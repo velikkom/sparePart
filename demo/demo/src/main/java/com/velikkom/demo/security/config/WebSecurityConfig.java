@@ -13,8 +13,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import com.velikkom.demo.security.service.UserDetailsServiceImpl;
-import org.springframework.security.core.userdetails.UserDetailsService;
+
+import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
@@ -27,12 +27,26 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(request -> {
+                    var corsConfig = new org.springframework.web.cors.CorsConfiguration();
+                    corsConfig.setAllowedOrigins(List.of("*")); // 🚀 Tüm kaynaklara izin ver
+                    corsConfig.setAllowedOrigins(List.of("http://localhost:3000")); // ✅ Frontend adresi
+                    corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                    corsConfig.setAllowedHeaders(List.of("*"));
+                    corsConfig.setAllowCredentials(true);
+                    return corsConfig;
+                }))
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
-                        .requestMatchers("/api/users/me").authenticated() // Giriş yapmış herkes erişebilir
-                        .requestMatchers("/api/users/admin").hasRole("ADMIN") // Sadece ADMIN yetkisi olanlar erişebilir
-                        .requestMatchers("/api/users/user").hasAnyRole("USER", "ADMIN") // USER ve ADMIN erişebilir
+                        // ✅ Login ve Swagger erişimi serbest
+                        .requestMatchers("/api/**", "/api/mail/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+
+                        // ✅ Kullanıcı rolleri
+                        .requestMatchers("/api/users/me").authenticated()
+                        .requestMatchers("/api/users/admin").hasRole("ADMIN")
+                        .requestMatchers("/api/users/user").hasAnyRole("USER", "ADMIN")
+
+                        // 🔐 Diğer istekler hala güvenlik kontrolü altında
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);

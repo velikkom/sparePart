@@ -1,24 +1,24 @@
 package com.velikkom.demo;
 
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.context.annotation.Bean;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 @TestConfiguration(proxyBeanMethods = false)
 class TestcontainersConfiguration {
 
-	@Bean
-	@ServiceConnection
-	PostgreSQLContainer<?> pgvectorContainer() {
-		return new PostgreSQLContainer<>(DockerImageName.parse("pgvector/pgvector:pg16"));
-	}
+    private static final PostgreSQLContainer<?> POSTGRESQL_CONTAINER;
 
-	@Bean
-	@ServiceConnection
-	PostgreSQLContainer<?> postgresContainer() {
-		return new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"));
-	}
+    static {
+        POSTGRESQL_CONTAINER = new PostgreSQLContainer<>(DockerImageName.parse("postgres:16.0"))
+                .withDatabaseName("testdb")
+                .withUsername("testuser")
+                .withPassword("testpassword");
 
+        POSTGRESQL_CONTAINER.start();
+    }
+
+    public static PostgreSQLContainer<?> getPostgreSQLContainer() {
+        return POSTGRESQL_CONTAINER;
+    }
 }

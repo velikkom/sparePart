@@ -24,6 +24,8 @@ public class Firm {
     @Column(nullable = false)
     private String phone;
 
+
+
     @Column(nullable = false, unique = true)
     private String taxNumber;
 }

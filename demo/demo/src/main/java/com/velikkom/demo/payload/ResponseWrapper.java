@@ -1,5 +1,6 @@
 package com.velikkom.demo.payload;
 
+import com.velikkom.demo.dto.business.ProductDTO;
 import lombok.*;
 
 @Getter
@@ -14,4 +15,6 @@ public class ResponseWrapper<T> {
 
     public ResponseWrapper(boolean b, String firmCreated) {
     }
+
+
 }

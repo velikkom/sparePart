@@ -4,8 +4,11 @@ import com.velikkom.demo.dto.user.UserDTO;
 import com.velikkom.demo.entity.concretes.user.Role;
 import com.velikkom.demo.entity.concretes.user.User;
 import com.velikkom.demo.entity.enums.RoleType;
+import com.velikkom.demo.exception.UserAlreadyExistsException;
+import com.velikkom.demo.exception.UserNotFoundException;
 import com.velikkom.demo.mapper.UserMapper;
 import com.velikkom.demo.messages.ErrorMessages;
+import com.velikkom.demo.messages.SuccessMessages;
 import com.velikkom.demo.payload.request.RegisterRequest;
 import com.velikkom.demo.payload.request.UpdatePasswordRequest;
 import com.velikkom.demo.repository.RoleRepository;
@@ -65,18 +68,18 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public String updatePassword(String username, UpdatePasswordRequest updatePasswordRequest) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı!"));
+                .orElseThrow(() -> new UserNotFoundException(ErrorMessages.USER_NOT_FOUND));
 
         // Mevcut şifre doğrulaması
         if (!passwordEncoder.matches(updatePasswordRequest.getOldPassword(), user.getPassword())) {
-            throw new RuntimeException("Eski şifre hatalı!");
+            throw new UserAlreadyExistsException(ErrorMessages.INVALID_OLD_PASSWORD);
         }
 
         // Yeni şifreyi hashleyerek güncelle
         user.setPassword(passwordEncoder.encode(updatePasswordRequest.getNewPassword()));
         userRepository.save(user);
 
-        return "Şifre başarıyla güncellendi!";
+        return SuccessMessages.PASSWORD_UPDATE_SUCCESS;
     }
 }
 

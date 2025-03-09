@@ -15,4 +15,12 @@ public class GlobalExceptionHandler {
                 .status(ex.getStatus())
                 .body(new ResponseWrapper<>(false, ex.getMessage(), null));
     }
+
+    @ExceptionHandler(FirmNotFoundException.class)
+    public ResponseEntity<ResponseWrapper<String>> handleFirmNotFoundException(FirmNotFoundException ex) {
+        return ResponseEntity
+                .status(ex.getStatus())
+                .body(new ResponseWrapper<>(false, ex.getMessage(), null));
+    }
 }
+//todo
