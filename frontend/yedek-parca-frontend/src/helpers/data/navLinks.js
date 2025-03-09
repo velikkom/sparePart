@@ -1,7 +1,7 @@
 
 const navLinks = [
     { name: "Anasayfa", path: "/" },
-    { name: "Ürün Kataloğu", path: "/urun-katalogu" },
+    { name: "Ürün", path: "/urun-katalogu" },
     { name: "Stok Takibi", path: "/stok-takibi" },
     { name: "Firma Paneli", path: "/firma-paneli" },
     { name: "Arama & Filtreleme", path: "/arama-filtreleme" },
