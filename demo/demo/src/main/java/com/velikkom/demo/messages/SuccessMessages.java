@@ -13,4 +13,5 @@ public class SuccessMessages {
 
     public static final String PRODUCT_CREATED_SUCCESSFULLY = "Ürün BAŞARIYLA oluşturuldu";
     public static final String PRODUCT_LISTED = "Ürünler listelendi";
+    public static final String PRODUCTS_CREATED_SUCCESSFULLY = "Ürünler BAŞARIYLA oluşturuldu";
 }
