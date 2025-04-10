@@ -9,10 +9,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/firms")
 @RequiredArgsConstructor
@@ -33,6 +35,7 @@ public class FirmController {
 
     @GetMapping
     @Operation(summary = "Tüm firmaları getir", description = "Sistemde kayıtlı olan tüm firmaları getirir.")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'PLASIYER')")
     public ResponseEntity<ResponseWrapper<List<FirmDTO>>> getAllFirms() {
         return buildResponse(SuccessMessages.FIRM_LISTED, firmService.getAllFirms());
     }

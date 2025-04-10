@@ -2,12 +2,15 @@ package com.velikkom.demo.security.service;
 
 import com.velikkom.demo.entity.concretes.user.User;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+@Getter
 @AllArgsConstructor
 public class UserDetailsImpl implements UserDetails {
 
@@ -15,8 +18,10 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return user.getRoles().stream()
-                .map(role -> (GrantedAuthority) () -> role.getName().name()) // name() çağrılıyor!
+        return user.getRoles()
+                .stream().map(role -> new SimpleGrantedAuthority(role
+                        .getName()
+                        .name()))
                 .collect(Collectors.toList());
     }
 
@@ -27,8 +32,9 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getUsername();
+        return user.getEmail();
     }
+
 
     @Override
     public boolean isAccountNonExpired() {
@@ -49,4 +55,15 @@ public class UserDetailsImpl implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
+
+
+    public Long getId() {
+        return user.getId();
+    }
+
+    public String getEmail() {
+        return user.getEmail();
+    }
+
 }

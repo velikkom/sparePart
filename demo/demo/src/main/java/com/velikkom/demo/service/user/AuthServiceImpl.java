@@ -9,17 +9,26 @@ import com.velikkom.demo.exception.UserNotFoundException;
 import com.velikkom.demo.mapper.UserMapper;
 import com.velikkom.demo.messages.ErrorMessages;
 import com.velikkom.demo.messages.SuccessMessages;
+import com.velikkom.demo.payload.request.LoginRequest;
 import com.velikkom.demo.payload.request.RegisterRequest;
 import com.velikkom.demo.payload.request.UpdatePasswordRequest;
+import com.velikkom.demo.payload.response.JwtResponse;
 import com.velikkom.demo.repository.RoleRepository;
 import com.velikkom.demo.repository.UserRepository;
+import com.velikkom.demo.security.jwt.JwtUtils;
+import com.velikkom.demo.security.service.UserDetailsImpl;
 import com.velikkom.demo.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +38,9 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtils jwtUtils;
+
 
 
     @Override
@@ -81,5 +93,36 @@ public class AuthServiceImpl implements AuthService {
 
         return SuccessMessages.PASSWORD_UPDATE_SUCCESS;
     }
+
+    @Transactional
+    public JwtResponse login(LoginRequest loginRequest) {
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+//        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+//        String jwtToken = jwtUtils.generateToken(userDetails.getUsername());
+
+        User user = ((UserDetailsImpl) authentication.getPrincipal()).getUser();
+        String jwtToken = jwtUtils.generateToken(user);
+
+
+
+        User user1 = userRepository.findByEmail(loginRequest.getEmail())
+                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı!"));
+
+        return JwtResponse.builder()
+                .token(jwtToken)
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .roles(user.getRoles().stream()
+                        .map(role -> role.getName().name())
+                        .collect(Collectors.toSet()))
+                .build();
+    }
+
+
 }
 

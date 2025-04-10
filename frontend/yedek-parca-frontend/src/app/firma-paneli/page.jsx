@@ -7,6 +7,7 @@ import FirmList from "../components/firms/FirmList";
 import { Container, Row, Col } from "react-bootstrap";
 
 const FirmaPaneli = () => {
+  useAuthGuard();
   const [selectedFirm, setSelectedFirm] = useState(null);
   const [firms, setFirms] = useState([]);
 

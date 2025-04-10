@@ -1,42 +1,59 @@
-import axios from "axios";
+// src/services/firmservice.js
 
-const API_URL = "http://localhost:8080/api/firms";
+import axiosInstance from "@/helpers/data/axiosInstance";
 
-// ✅ Get all firms
+
+
+// import axiosInstance from "@/helpers/api/axiosInstance";
+
+const API_URL = "/firms";
+
+// ✅ Tüm firmaları getir
 export const getAllFirms = async () => {
   try {
-    const response = await axios.get(API_URL);
-    return response.data.data;
+    const response = await axiosInstance.get("/firms");
+    return response.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Firmalar listelenemedi");
+    console.error("Firmalar yüklenemedi:", error);
+    throw error; // Hata gösterimi için yukarı fırlat
   }
 };
 
-// ✅ Create a new firm
+// ✅ ID ile firma getir
+export const getFirmById = async (id) => {
+  try {
+    const response = await axiosInstance.get(`${API_URL}/${id}`);
+    return response.data.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Firma bulunamadı");
+  }
+};
+
+// ✅ Yeni firma oluştur
 export const createFirm = async (firmData) => {
   try {
-    const response = await axios.post(API_URL, firmData);
-    return response.data;
+    const response = await axiosInstance.post(API_URL, firmData);
+    return response.data.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Firma kaydedilemedi");
   }
 };
 
-// ✅ Update a firm
+// ✅ Firma güncelle
 export const updateFirm = async (id, firmData) => {
   try {
-    const response = await axios.put(`${API_URL}/${id}`, firmData);
-    return response.data;
+    const response = await axiosInstance.put(`${API_URL}/${id}`, firmData);
+    return response.data.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Firma güncellenemedi");
   }
 };
 
-// ✅ Delete a firm
+// ✅ Firma sil
 export const deleteFirm = async (id) => {
   try {
-    const response = await axios.delete(`${API_URL}/${id}`);
-    return response.data;
+    const response = await axiosInstance.delete(`${API_URL}/${id}`);
+    return response.data.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Firma silinemedi");
   }

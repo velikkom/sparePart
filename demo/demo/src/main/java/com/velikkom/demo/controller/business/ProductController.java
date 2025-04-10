@@ -21,11 +21,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000")
 public class ProductController {
 
     private final ProductService productService;
 
-    @PostMapping
+    @PostMapping("/add")
     @Operation(summary = "Yeni Ürün Oluştur", description = "Yeni bir ürün kaydı oluşturur.")
     public ResponseEntity<ResponseWrapper<ProductDTO>> createProduct(@RequestBody ProductRequest productRequest) throws BadRequestException {
         ProductDTO product = productService.createProduct(productRequest);

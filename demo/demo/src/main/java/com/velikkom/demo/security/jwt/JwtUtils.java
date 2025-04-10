@@ -1,15 +1,21 @@
 package com.velikkom.demo.security.jwt;
 
+import com.velikkom.demo.entity.concretes.user.User;
+import com.velikkom.demo.security.service.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -33,16 +39,25 @@ public class JwtUtils {
     }
 
     /**
-     * Kullanıcı adıyla JWT token oluşturur.
+     * Kullanıcı nesnesiyle JWT token oluşturur.
      */
-    public String generateToken(String username) {
+    public String generateToken(User user) {
+        List<String> roles = user.getRoles()
+                .stream()
+                .map(r -> r.getName().name())
+                .collect(Collectors.toList());
+
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(user.getEmail()) // sub olarak email
+                .claim("roles", roles)       // roller claim'e eklendi
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
+
+
+
 
     /**
      * Token içindeki kullanıcı adını döndürür.

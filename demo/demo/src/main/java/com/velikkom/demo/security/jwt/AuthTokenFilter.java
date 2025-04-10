@@ -23,14 +23,19 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     private final UserDetailsServiceImpl userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
             throws ServletException, IOException {
+
         try {
             String token = jwtUtils.getTokenFromRequest(request);
+            System.out.println("Token geldi: " + token);
             if (token != null && jwtUtils.validateToken(token)) {
-                String username = jwtUtils.getUsernameFromToken(token);
+                String email = jwtUtils.getUsernameFromToken(token);
+                System.out.println("Kullanıcı: " + email);
 
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
@@ -39,9 +44,11 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception e) {
-            System.out.println("JWT doğrulama hatası: " + e.getMessage());
+            System.out.println("JWT filtreleme hatası: " + e.getMessage());
         }
 
         filterChain.doFilter(request, response);
+
     }
+
 }

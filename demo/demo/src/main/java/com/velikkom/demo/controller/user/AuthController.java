@@ -11,6 +11,7 @@ import com.velikkom.demo.security.jwt.JwtUtils;
 import com.velikkom.demo.security.service.UserDetailsImpl;
 import com.velikkom.demo.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,19 +32,14 @@ public class AuthController {
     private final JwtUtils jwtUtils;
     private final AuthService authService;
 
-    @PostMapping("/login")
+
     @Operation(summary = "Kayıtlı kullanıcı nın logın işlemi", description = "Kayıtlı kullanıcının logın ıslemını yapar ve jwt token dondururu.")
-    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateToken(loginRequest.getUsername());
-
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-
-        return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getUsername()));
+    @PostMapping("/login")
+    public ResponseEntity<JwtResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+        JwtResponse jwtResponse = authService.login(loginRequest);
+        return ResponseEntity.ok(jwtResponse);
     }
+
 
     @PostMapping("/register")
     @Operation(summary = "Yeni kullanıcı kaydı", description = "Yeni bir kullanıcı oluşturur ve varsayılan olarak ROLE_USER atar.")

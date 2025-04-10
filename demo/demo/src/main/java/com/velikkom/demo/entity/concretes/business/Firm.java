@@ -3,6 +3,8 @@ package com.velikkom.demo.entity.concretes.business;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "firms")
 @Getter
@@ -24,8 +26,9 @@ public class Firm {
     @Column(nullable = false)
     private String phone;
 
-
-
     @Column(nullable = false, unique = true)
     private String taxNumber;
+
+    @Column(nullable = false)
+    private BigDecimal debt = BigDecimal.ZERO;
 }

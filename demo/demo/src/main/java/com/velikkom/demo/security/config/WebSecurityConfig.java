@@ -7,60 +7,60 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import java.util.List;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
 @Configuration
 @RequiredArgsConstructor
+@EnableMethodSecurity
 public class WebSecurityConfig {
 
     private final AuthEntryPointJwt unauthorizedHandler;
     private final AuthTokenFilter authTokenFilter;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(request -> {
-                    var corsConfig = new org.springframework.web.cors.CorsConfiguration();
-                    corsConfig.setAllowedOrigins(List.of("*")); // 🚀 Tüm kaynaklara izin ver
-                    corsConfig.setAllowedOrigins(List.of("http://localhost:3000")); // ✅ Frontend adresi
-                    corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                    corsConfig.setAllowedHeaders(List.of("*"));
-                    corsConfig.setAllowCredentials(true);
-                    return corsConfig;
-                }))
-                .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
-                .authorizeHttpRequests(auth -> auth
-                        // ✅ Login ve Swagger erişimi serbest
-                        .requestMatchers("/api/**", "/api/mail/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-
-                        // ✅ Kullanıcı rolleri
-                        .requestMatchers("/api/users/me").authenticated()
-                        .requestMatchers("/api/users/admin").hasRole("ADMIN")
-                        .requestMatchers("/api/users/user").hasAnyRole("USER", "ADMIN")
-
-                        // 🔐 Diğer istekler hala güvenlik kontrolü altında
-                        .anyRequest().authenticated()
-                )
-                .addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
-    }
-
+    // 🔐 Password Encoder
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    // 🔐 Authentication Manager (login için gerekli)
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
+    }
+
+    // 🔐 Güvenlik kuralları
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        http.csrf(AbstractHttpConfigurer::disable)
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+
+                        // Giriş ve Swagger serbest
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+
+                        // Role bazlı koruma
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/plasiyer/**").hasAnyRole("PLASIYER", "ADMIN")
+                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
+
+                        // Geri kalan her şey auth ister
+                        .anyRequest().authenticated()
+                );
+
+        // 🔐 JWT filtresi
+        http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
     }
 }
