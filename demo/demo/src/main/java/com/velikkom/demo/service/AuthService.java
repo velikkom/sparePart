@@ -16,4 +16,6 @@ public interface AuthService {
     String updatePassword(String username, UpdatePasswordRequest updatePasswordRequest);
 
     JwtResponse login(@Valid LoginRequest loginRequest);
+
+    UserDTO registerUserWithRoles(RegisterRequest request);
 }

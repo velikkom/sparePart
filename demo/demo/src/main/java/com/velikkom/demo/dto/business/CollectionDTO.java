@@ -14,4 +14,5 @@ public class CollectionDTO {
     private PaymentMethods paymentMethod;
     private String receiptNumber;
     private Long firmId;
+    private String firmName;
 }

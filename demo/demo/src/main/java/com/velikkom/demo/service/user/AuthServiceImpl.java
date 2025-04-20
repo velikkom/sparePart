@@ -4,6 +4,7 @@ import com.velikkom.demo.dto.user.UserDTO;
 import com.velikkom.demo.entity.concretes.user.Role;
 import com.velikkom.demo.entity.concretes.user.User;
 import com.velikkom.demo.entity.enums.RoleType;
+import com.velikkom.demo.exception.ResourceNotFoundException;
 import com.velikkom.demo.exception.UserAlreadyExistsException;
 import com.velikkom.demo.exception.UserNotFoundException;
 import com.velikkom.demo.mapper.UserMapper;
@@ -22,12 +23,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -96,22 +99,27 @@ public class AuthServiceImpl implements AuthService {
 
     @Transactional
     public JwtResponse login(LoginRequest loginRequest) {
+        System.out.println("🔐 Giriş denemesi: " + loginRequest.getEmail() + " / " + loginRequest.getPassword());
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+        User user = userRepository.findByEmail(loginRequest.getEmail())
+                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı!"));
+
+        if (!user.isActive()) {
+            throw new ResourceNotFoundException(ErrorMessages.KULLANICI_HESABI_INACTIVE);
+        }
+
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+            System.out.println("✅ Authentication başarılı: " + authentication.getName());
+        } catch (AuthenticationException e) {
+            System.out.println("❌ Authentication başarısız: " + e.getMessage());
+            throw new RuntimeException("Giriş bilgileri hatalı");
+        }
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
-//        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-//        String jwtToken = jwtUtils.generateToken(userDetails.getUsername());
-
-        User user = ((UserDetailsImpl) authentication.getPrincipal()).getUser();
         String jwtToken = jwtUtils.generateToken(user);
-
-
-
-        User user1 = userRepository.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı!"));
 
         return JwtResponse.builder()
                 .token(jwtToken)
@@ -121,6 +129,27 @@ public class AuthServiceImpl implements AuthService {
                         .map(role -> role.getName().name())
                         .collect(Collectors.toSet()))
                 .build();
+    }
+
+
+    @Override
+    public UserDTO registerUserWithRoles(RegisterRequest registerRequest) {
+        if (userRepository.existsByEmail(registerRequest.getEmail())){
+            throw new RuntimeException("Bu eposta zaten kayıtlı");
+        }
+
+        User newUser = new User();
+        newUser.setUsername(registerRequest.getUsername());
+        newUser.setEmail(registerRequest.getEmail());
+        newUser.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+
+        Set<Role> roles = registerRequest.getRoles().stream()
+                .map(roleType -> roleRepository.findByName(roleType)
+                        .orElseThrow(() -> new RuntimeException("Rol bulunamadı: " + roleType)))
+                .collect(Collectors.toSet());
+
+        newUser.setRoles(roles);
+        return userMapper.toDTO(userRepository.save(newUser));
     }
 
 

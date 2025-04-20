@@ -44,6 +44,8 @@ public class DataInitializer {
                         .email("admin@example.com")
                         .password(passwordEncoder.encode("Admin123!"))
                         .roles(Set.of(adminRole))
+                        .active(true)
+                        .isNewUser(false)
                         .build();
 
                 userRepository.save(adminUser);
@@ -59,6 +61,8 @@ public class DataInitializer {
                         .email("plasiyer@example.com")
                         .password(passwordEncoder.encode("Plasiyer123!"))
                         .roles(Set.of(plasiyerRole))
+                        .active(true)
+                        .isNewUser(false)
                         .build();
 
                 userRepository.save(plasiyerUser);

@@ -9,4 +9,5 @@ public class ErrorMessages {
 
     public static final String USER_REGISTER_SUCCESS = "Kullanıcı başarıyla oluşturuldu!";
     public static final String FIRM_NOT_FOUND = "Firma bulunamadı";
+    public static String KULLANICI_HESABI_INACTIVE="Kullanıcı hesabı aktif değil. Lütfen yöneticinizle iletişime geçin.";
 }

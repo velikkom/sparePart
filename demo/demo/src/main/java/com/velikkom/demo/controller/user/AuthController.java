@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -36,6 +37,7 @@ public class AuthController {
     @Operation(summary = "Kayıtlı kullanıcı nın logın işlemi", description = "Kayıtlı kullanıcının logın ıslemını yapar ve jwt token dondururu.")
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+        System.out.println("📩 API çağrısı alındı");
         JwtResponse jwtResponse = authService.login(loginRequest);
         return ResponseEntity.ok(jwtResponse);
     }
@@ -55,6 +57,14 @@ public class AuthController {
         String response = authService.updatePassword(userDetails.getUsername(), updatePasswordRequest);
         return ResponseEntity.ok(new ResponseWrapper<>(true, SuccessMessages.PASSWORD_UPDATE_SUCCESS, response));
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/admin/register")
+    public ResponseEntity<?> registerWithRole(@RequestBody RegisterRequest request) {
+        UserDTO user = authService.registerUserWithRoles(request);
+        return ResponseEntity.ok(user);
+    }
+
 }
 
 
