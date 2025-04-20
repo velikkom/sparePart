@@ -9,6 +9,6 @@ export const firmValidationSchema = Yup.object().shape({
     .matches(/^[0-9]{10}$/, 'Telefon numarası 10 haneli olmalıdır')
     .required('Telefon zorunludur'),
   taxNumber: Yup.string()
-    .matches(/^[0-9]{10}$/, 'Vergi numarası 10 haneli olmalıdır')
+    .matches(/^[0-9]{3}$/, 'Vergi numarası 10 haneli olmalıdır')
     .required('Vergi numarası zorunludur'),
 });

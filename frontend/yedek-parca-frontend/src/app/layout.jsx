@@ -21,8 +21,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="tr">
       <body>
+        <SessionProvider>
        <Header />
         <div>{children}</div>
+        </SessionProvider>
       </body>
     </html>
   );

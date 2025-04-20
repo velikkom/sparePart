@@ -1,22 +1,23 @@
+"use client";
+import { useSession } from "next-auth/react";
+import { useEffect } from "react";
 
-import dashboardCards from "@/helpers/data/dashboardCard";
-import DashboardCard from "./DashboardCard";
+export default function DashboardPage() {
+  const { data: session, status } = useSession();
 
+  useEffect(() => {
+    console.log("🔍 useSession status:", status);
+    console.log("🔐 useSession data:", session);
+  }, [session, status]);
 
-const Dashboard = () => {
-    return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-8 justify-items-center">
-          {dashboardCards.map((card) => (
-            <DashboardCard
-              key={card.title}
-              title={card.title}
-              description={card.description}
-              route={card.route}
-              icon={card.icon}
-            />
-          ))}
-        </div>
-      );
-};
+  if (status === "loading") return <p>Yükleniyor...</p>;
+  if (status === "unauthenticated") return <p>Oturum yok!</p>;
 
-export default Dashboard;
+  return (
+    <div className="p-10">
+      <h1>Dashboard</h1>
+      <p>Hoş geldin: {session?.user?.name || session?.user?.email}</p>
+      <p>Rollerin: {session?.user?.roles?.join(", ")}</p>
+    </div>
+  );
+}

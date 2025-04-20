@@ -1,22 +1,27 @@
 "use client";
 
-import { useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import useAuthGuard from "@/helpers/hooks/useAuthGuard";
+import { useEffect } from "react";
 
 export default function DashboardPage() {
-  useAuthGuard();
+  const { data: session, status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    // Eğer token yoksa kullanıcıyı login sayfasına gönder
-    if (!token) {
+    if (status === "unauthenticated") {
       router.push("/auth/login");
     }
-  }, []);
+  }, [status]);
 
-  return <div>Dashboard Page</div>;
+  if (status === "loading") {
+    return <div>Yükleniyor...</div>;
+  }
+
+  return (
+    <div>
+      <h1>Dashboard Page</h1>
+      <p>Merhaba { session?.user?.email || session?.user?.name}</p>
+    </div>
+  );
 }
-

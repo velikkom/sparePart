@@ -6,7 +6,7 @@ import { getAllFirms, getFirmById } from "@/service/firmservice";
 import { addCollection } from "@/service/collectionService";
 
 
-export default function TahsilatEklePage() {
+export default function TahsilatEklePage({selected, setSelected}) {
   const [formData, setFormData] = useState({
     firmId: "",
     amount: "",
@@ -26,6 +26,19 @@ export default function TahsilatEklePage() {
       .catch(() => Swal.fire("Hata", "Firmalar yüklenemedi", "error"));
   }, []);
   console.log("getAllFirms çağrıldı");
+
+  useEffect(() => {
+    if (selected) {
+      setForm({
+        firmId: selected.firmId,
+        amount: selected.amount,
+        collectionDate: selected.collectionDate,
+        paymentMethod: selected.paymentMethod,
+        receiptNumber: selected.receiptNumber || "",
+      });
+    }
+  }, [selected]);
+  
 
   const handleChange = async (e) => {
     const { name, value } = e.target;

@@ -1,60 +1,122 @@
 // src/services/firmservice.js
 
-import axiosInstance from "@/helpers/data/axiosInstance";
+const API_URL = "http://localhost:8080/api/firms";
 
-
-
-// import axiosInstance from "@/helpers/api/axiosInstance";
-
-const API_URL = "/firms";
+// ✅ Token'ı localStorage'dan güvenli bir şekilde al
+const getToken = () => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  return user?.token || "";
+};
 
 // ✅ Tüm firmaları getir
 export const getAllFirms = async () => {
   try {
-    const response = await axiosInstance.get("/firms");
-    return response.data;
+    const res = await fetch(API_URL, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error("Firmalar alınamadı: " + errorText);
+    }
+
+    const data = await res.json();
+    return data.data;
   } catch (error) {
-    console.error("Firmalar yüklenemedi:", error);
-    throw error; // Hata gösterimi için yukarı fırlat
+    console.error("❌ getAllFirms hatası:", error);
+    throw error;
   }
 };
 
 // ✅ ID ile firma getir
 export const getFirmById = async (id) => {
   try {
-    const response = await axiosInstance.get(`${API_URL}/${id}`);
-    return response.data.data;
+    const res = await fetch(`${API_URL}/${id}`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error("Firma bulunamadı");
+    }
+
+    const data = await res.json();
+    return data.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Firma bulunamadı");
+    console.error("❌ getFirmById hatası:", error);
+    throw error;
   }
 };
 
 // ✅ Yeni firma oluştur
 export const createFirm = async (firmData) => {
   try {
-    const response = await axiosInstance.post(API_URL, firmData);
-    return response.data.data;
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify(firmData),
+    });
+
+    if (!res.ok) {
+      throw new Error("Firma oluşturulamadı");
+    }
+
+    const data = await res.json();
+    return data.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Firma kaydedilemedi");
+    console.error("❌ createFirm hatası:", error);
+    throw error;
   }
 };
 
 // ✅ Firma güncelle
 export const updateFirm = async (id, firmData) => {
   try {
-    const response = await axiosInstance.put(`${API_URL}/${id}`, firmData);
-    return response.data.data;
+    const res = await fetch(`${API_URL}/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify(firmData),
+    });
+
+    if (!res.ok) {
+      throw new Error("Firma güncellenemedi");
+    }
+
+    const data = await res.json();
+    return data.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Firma güncellenemedi");
+    console.error("❌ updateFirm hatası:", error);
+    throw error;
   }
 };
 
 // ✅ Firma sil
 export const deleteFirm = async (id) => {
   try {
-    const response = await axiosInstance.delete(`${API_URL}/${id}`);
-    return response.data.data;
+    const res = await fetch(`${API_URL}/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error("Firma silinemedi");
+    }
+
+    const data = await res.json();
+    return data.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Firma silinemedi");
+    console.error("❌ deleteFirm hatası:", error);
+    throw error;
   }
 };

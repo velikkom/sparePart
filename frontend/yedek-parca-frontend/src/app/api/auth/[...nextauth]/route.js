@@ -1,61 +1,65 @@
-import NextAuth from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
+import NextAuth from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
 
 const handler = NextAuth({
   providers: [
     CredentialsProvider({
-      name: 'Credentials',
+      name: "Credentials",
       credentials: {
-        email: { label: 'Email', type: 'text' },
-        password: { label: 'Password', type: 'password' },
+        email: { label: "Email", type: "text" },
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        console.log("🔍 Login request sent to backend...");
+        console.log("📩 Credentials:", credentials);
+      
         try {
-          const res = await fetch('http://localhost:8080/auth/login', {
-            method: 'POST',
+          const res = await fetch("http://localhost:8080/api/auth/login", {
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({
               email: credentials.email,
               password: credentials.password,
             }),
           });
-
+      
           const data = await res.json();
-
+      
+          console.log("✅ Backend response:", data);
+          console.log("📡 Response status:", res.status);
+      
           if (!res.ok || !data.token) {
-            throw new Error(data.message || 'Giriş başarısız');
+            throw new Error(data.message || "Giriş başarısız");
           }
-
-          // JWT token ve kullanıcı bilgileri backend'den dönüyor
+      
           return {
-            id: data.user?.id,
-            email: data.user?.email,
-            name: data.user?.name,
-            token: data.token, // JWT token
-            roles: data.user?.roles || [], // varsa roller
+            name: data.username,
+            email: data.email,
+            token: data.token,
+            roles: data.roles,
           };
         } catch (error) {
-          console.error('authorize error:', error);
-          return null;
+          console.error("❌ authorize() error:", error);
+          throw new Error(error.message || "Sunucuya bağlanılamadı");
         }
-      },
+      }
+      
     }),
   ],
   pages: {
-    signIn: '/auth/login',
+    signIn: "/auth/login",
   },
   session: {
-    strategy: 'jwt',
+    strategy: "jwt",
   },
   callbacks: {
     async jwt({ token, user }) {
-      // login sırasında user varsa JWT’ye token ekle
       if (user) {
         token.accessToken = user.token;
         token.user = {
-          id: user.id,
+         
           name: user.name,
           email: user.email,
           roles: user.roles,
@@ -64,4 +68,12 @@ const handler = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      // session.user içine JWT'den
+      session.user = token.user;
+      session.accessToken = token.accessToken;
+      return session;
+    },
+  },
+  secret: process.env.NEXTAUTH_SECRET,
+});
+
+export { handler as GET, handler as POST };

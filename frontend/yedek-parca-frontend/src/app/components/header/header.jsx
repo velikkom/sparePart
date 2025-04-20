@@ -1,35 +1,73 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { MegaMenu } from "primereact/megamenu";
 import { useRouter } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 import getMenuItems from "@/helpers/data/menuItem";
-import useAuth from "@/helpers/hooks/useAuth";
+import { checkNewUserAlert } from "@/service/userService";
 
 const Header = () => {
   const router = useRouter();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const { role: userRole, email } = useAuth();
+  const { data: session, status } = useSession();
 
-  useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem("token");
-      setIsLoggedIn(!!token);
-    };
+  const [hasNewUsers, setHasNewUsers] = useState(false);
+  const [menuItems, setMenuItems] = useState([]);
+  const menuRef = useRef(null);
 
-    checkAuth();
-    const interval = setInterval(checkAuth, 1000);
-    return () => clearInterval(interval);
+  const email = session?.user?.email || "";
+  const roleList = session?.user?.roles || [];
+  const isAdmin = roleList.includes("ROLE_ADMIN");
+  const userRole = roleList.length > 0 ? roleList[0].replace("ROLE_", "") : "";
+  const isLoggedIn = status === "authenticated";
+
+  // ✅ Sonsuz döngüyü önlemek için useCallback ile sabit referanslı logout
+  const handleLogout = useCallback(() => {
+    signOut({ callbackUrl: "/auth/login" });
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    setIsLoggedIn(false);
-    router.push("/auth/login");
-  };
+  // 🔔 Yeni kullanıcı kontrolü
+  useEffect(() => {
+    const fetchNewUserStatus = async () => {
+      if (!isAdmin) return;
+      try {
+        const result = await checkNewUserAlert();
+        console.log("🚨 Yeni kullanıcı var mı:", result);
+        setHasNewUsers(result);
+      } catch (e) {
+        console.log("Yeni kullanıcı sorgusu başarısız");
+      }
+    };
 
-  const menuItems = getMenuItems(isLoggedIn, handleLogout, userRole, email);
+    fetchNewUserStatus();
+  }, [isAdmin]);
 
+  // 📦 Menü verisini güncelle
+  useEffect(() => {
+    const items = getMenuItems(
+      isLoggedIn,
+      handleLogout,
+      userRole,
+      email,
+      hasNewUsers
+    );
+    setMenuItems(items);
+  }, [isLoggedIn, handleLogout, userRole, email, hasNewUsers]);
+
+  // 🔧 Menüde focus problemi varsa blur et
+  useEffect(() => {
+    const fixMenuFocus = () => {
+      const active = document.activeElement;
+      if (active && active.closest(".p-megamenu")) {
+        active.blur();
+      }
+    };
+
+    const timer = setTimeout(fixMenuFocus, 300);
+    return () => clearTimeout(timer);
+  }, [hasNewUsers]);
+
+  // 🔁 Menüde path varsa router.push olarak setle
   const updatedItems = menuItems.map((item) => ({
     ...item,
     command: item.path ? () => router.push(item.path) : item.command,
@@ -49,33 +87,19 @@ const Header = () => {
   return (
     <header className="bg-blue-600 text-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 py-3 flex justify-center items-center">
-        {/* Sol taraf - Başlık */}
         <h1
           className="text-2xl font-bold text-red-500 cursor-pointer"
           onClick={() => router.push("/")}
         >
-         
+          {/* Logo veya başlık yeri */}
         </h1>
 
-        {/* Orta - Menü */}
         <MegaMenu
+          ref={menuRef}
           model={updatedItems}
           breakpoint="960px"
           className="bg-smoke-600 text-yellow-500"
         />
-
-        {/* Sağ taraf - Kullanıcı ve Logout */}
-        {isLoggedIn && email && (
-          <div className="flex items-center space-x-4">
-            <span className="text-sm">👤 {email}</span>
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-white text-sm"
-            >
-              Çıkış Yap
-            </button>
-          </div>
-        )}
       </div>
     </header>
   );

@@ -73,7 +73,7 @@ const FirmForm = ({ fetchFirms, selectedFirm, setSelectedFirm }) => {
                 {field === "name" && "Firma Adı"}
                 {field === "address" && "Adres"}
                 {field === "phone" && "Telefon"}
-                {field === "taxNumber" && "Vergi Numarası"}
+                {field === "taxNumber" && "Cari Hesap Kodu"}
                 <span className="text-red-500">*</span>
               </label>
               <InputText
