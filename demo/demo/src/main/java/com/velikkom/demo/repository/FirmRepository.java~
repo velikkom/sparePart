@@ -10,7 +10,5 @@ public interface FirmRepository extends JpaRepository<Firm ,Long >, JpaSpecifica
     boolean existsByName(String name);
 
     boolean existsByCode(String code);
-
-    boolean existsByTaxNumber(String taxNumber);
 }
 //todo burda kaldım

@@ -129,7 +129,15 @@
             <version>1.19.3</version>
             <scope>test</scope>
         </dependency>
-    <!-- ✅ Spring Botomaik mail atma-->
+
+        <!-- ✅Apache POI for reading .xlsx files -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.2.3</version>
+        </dependency>
+
+        <!-- ✅ Spring Botomaik mail atma-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>

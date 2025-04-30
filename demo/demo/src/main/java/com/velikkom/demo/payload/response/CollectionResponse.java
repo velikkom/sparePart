@@ -1,13 +1,16 @@
-package com.velikkom.demo.payload.request;
+package com.velikkom.demo.payload.response;
 
 import com.velikkom.demo.entity.enums.PaymentMethods;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
-public class CollectionSearchRequest {
+@AllArgsConstructor
+public class CollectionResponse {
+
     private Long firmId;
     private LocalDate startDate;
     private LocalDate endDate;

@@ -15,6 +15,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -30,6 +31,7 @@ public class CollectionController {
 
     @Operation(summary = "Yeni tahsilat oluştur", description = "Yeni bir tahsilat kaydı oluşturur.")
     @PostMapping("/add")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_PLASIYER')")
     public ResponseEntity<ResponseWrapper<CollectionDTO>> createCollection(@RequestBody CollectionDTO collectionDTO) {
         CollectionDTO result = collectionService.createCollection(collectionDTO);
         return new ResponseEntity<>(new ResponseWrapper<>(true, "Tahsilat oluşturuldu", result), HttpStatus.CREATED);
@@ -37,6 +39,7 @@ public class CollectionController {
 
     @Operation(summary = "Tahsilatları filtrele ve sayfalı listele")
     @GetMapping("/search")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_PLASIYER')")
     public ResponseEntity<ResponseWrapper<Page<CollectionDTO>>> searchCollections(
             @RequestParam(required = false) Long firmId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -54,5 +57,24 @@ public class CollectionController {
 
         return new ResponseEntity<>(new ResponseWrapper<>(true, "Tahsilatlar listelendi", result), HttpStatus.OK);
     }
+
+    @Operation(summary = "Tahsilat güncelle", description = "Belirtilen ID'li tahsilatı günceller.")
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_PLASIYER')")
+    public ResponseEntity<ResponseWrapper<Void>> updateCollection(
+            @PathVariable Long id,
+            @RequestBody CollectionDTO collectionDTO
+    ) {
+        collectionService.updateCollection(id, collectionDTO);
+        return ResponseEntity.ok(new ResponseWrapper<>(true, "Tahsilat güncellendi"));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_PLASIYER')")
+    public ResponseEntity<ResponseWrapper<Void>> deleteCollection(@PathVariable Long id) {
+        collectionService.deleteCollection(id);
+        return ResponseEntity.ok(new ResponseWrapper<>(true, null));
+    }
+
 
 }

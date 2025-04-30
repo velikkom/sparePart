@@ -4,12 +4,16 @@ import com.velikkom.demo.dto.user.UserAdminDTO;
 import com.velikkom.demo.entity.concretes.user.User;
 import com.velikkom.demo.payload.request.UpdateRolesRequest;
 import com.velikkom.demo.repository.UserRepository;
+import com.velikkom.demo.service.ExcelImportService;
 import com.velikkom.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:3000")
@@ -21,6 +25,7 @@ public class AdminUserController {
 
     private final UserService userService;
     private final UserRepository userRepository;
+    private final ExcelImportService excelImportService;
 
     @GetMapping()
     public ResponseEntity<List<UserAdminDTO>> getAllUsers() {
@@ -61,6 +66,25 @@ public class AdminUserController {
         userRepository.saveAll(newUsers);
         return ResponseEntity.noContent().build();
     }
+
+//    @PostMapping(value = "/excel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    @PreAuthorize("hasRole('ADMIN')")
+//    public ResponseEntity<?> importFirms(@RequestParam("file") MultipartFile file) {
+//        try {
+//            excelImportService.importFirmsFromExcel(file.getInputStream());
+//            return ResponseEntity.ok("Firmalar başarıyla yüklendi.");
+//        } catch (Exception e) {
+//            return ResponseEntity.badRequest().body("Yükleme sırasında hata oluştu: " + e.getMessage());
+//        }
+//    }
+
+    @PostMapping(value = "/excel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> uploadFirmsFromExcel(@RequestParam("file") MultipartFile file) {
+        excelImportService.importFirmsFromExcel(file);
+        return ResponseEntity.ok("Dosya başarıyla yüklendi ve veriler kaydedildi.");
+    }
+
 
 
 }

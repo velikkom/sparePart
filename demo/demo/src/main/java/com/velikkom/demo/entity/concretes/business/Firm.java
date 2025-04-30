@@ -12,23 +12,27 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Data
 public class Firm {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column()
     private String name;
 
-    @Column(nullable = false)
+    @Column()
     private String address;
 
-    @Column(nullable = false)
+    @Column()
     private String phone;
 
-    @Column(nullable = false, unique = true)
+    @Column()
     private String taxNumber;
 
-    @Column(nullable = false)
+    @Column()
     private BigDecimal debt = BigDecimal.ZERO;
+
+    @Column()
+    private String code;
 }

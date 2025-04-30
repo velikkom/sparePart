@@ -15,4 +15,10 @@ public class CollectionDTO {
     private String receiptNumber;
     private Long firmId;
     private String firmName;
+    private String checkBankName;
+    private LocalDate checkDueDate;
+
+    private BigDecimal noteAmount;
+    private LocalDate noteDueDate;
+
 }

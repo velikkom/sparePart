@@ -10,6 +10,7 @@ import com.velikkom.demo.repository.CollectionRepository;
 import com.velikkom.demo.repository.FirmRepository;
 import com.velikkom.demo.service.CollectionService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j // ✨ Loglama ekliyoruz
 public class CollectionServiceImpl implements CollectionService {
 
     private final CollectionRepository collectionRepository;
@@ -27,7 +29,8 @@ public class CollectionServiceImpl implements CollectionService {
 
     @Override
     public CollectionDTO createCollection(CollectionDTO dto) {
-      Firm firm = firmRepository.findById(dto.getFirmId()).orElseThrow(()-> new ResourceNotFoundException("Firma bulunamadı"));
+        Firm firm = firmRepository.findById(dto.getFirmId())
+                .orElseThrow(() -> new ResourceNotFoundException("Firma bulunamadı"));
 
         Collection collection = collectionMapper.toEntity(dto);
         collection.setFirm(firm);
@@ -43,8 +46,6 @@ public class CollectionServiceImpl implements CollectionService {
         return collectionMapper.toDTO(savedCollection);
     }
 
-
-
     @Override
     public List<CollectionDTO> getCollectionsByFirmId(Long firmId) {
         List<Collection> collections = collectionRepository.findByFirmId(firmId);
@@ -53,11 +54,51 @@ public class CollectionServiceImpl implements CollectionService {
 
     @Override
     public Page<CollectionDTO> searchCollections(CollectionSearchRequest request, Pageable pageable) {
-        Page<Collection> resultPage = collectionRepository.searchCollections(request.getFirmId(),
+        // ✨ Log ekledik
+        log.debug("Tahsilat araması başlatıldı. Filtreler -> FirmId: {}, StartDate: {}, EndDate: {}, PaymentMethod: {}",
+                request.getFirmId(), request.getStartDate(), request.getEndDate(), request.getPaymentMethod());
+
+        Page<Collection> resultPage = collectionRepository.searchCollections(
+                request.getFirmId(),
                 request.getStartDate(),
                 request.getEndDate(),
                 request.getPaymentMethod(),
-                pageable);
+                pageable
+        );
+
         return resultPage.map(collectionMapper::toDTO);
     }
+
+    @Override
+    public void updateCollection(Long id, CollectionDTO dto) {
+        Collection collection = collectionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tahsilat bulunamadı"));
+
+        // Güncelleme alanları
+        collection.setAmount(dto.getAmount());
+        collection.setCollectionDate(dto.getCollectionDate());
+        collection.setPaymentMethod(dto.getPaymentMethod());
+        collection.setReceiptNumber(dto.getReceiptNumber());
+        collection.setCheckBankName(dto.getCheckBankName());
+        collection.setCheckDueDate(dto.getCheckDueDate());
+        collection.setNoteAmount(dto.getNoteAmount());
+        collection.setNoteDueDate(dto.getNoteDueDate());
+
+        // Firma kontrolü
+        if (!collection.getFirm().getId().equals(dto.getFirmId())) {
+            collection.setFirm(firmRepository.findById(dto.getFirmId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Firma bulunamadı")));
+        }
+
+        collectionRepository.save(collection);
+    }
+
+    @Override
+    public void deleteCollection(Long id) {
+        Collection collection = collectionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tahsilat bulunamadı"));
+
+        collectionRepository.delete(collection);
+    }
+
 }

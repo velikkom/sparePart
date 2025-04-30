@@ -25,8 +25,21 @@ public class Collection {
 
     private String receiptNumber; // Makbuz numarası
 
+    @Column(name = "check_bank_name")
+    private String checkBankName;
+
+    @Column(name = "check_due_date")
+    private LocalDate checkDueDate;
+
     @Enumerated(EnumType.STRING)
     private PaymentMethods paymentMethod;
+
+    @Column(name = "note_due_date")
+    private LocalDate noteDueDate;
+
+    @Column(name = "note_amount")
+    private BigDecimal noteAmount;
+
 
     @ManyToOne
     @JoinColumn(name = "firm_id")
