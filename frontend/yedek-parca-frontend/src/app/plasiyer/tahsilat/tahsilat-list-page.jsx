@@ -1,11 +1,25 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { getAllFirms } from "@/service/firmservice";
-import { searchCollections } from "@/service/collectionService";
+import {
+  searchCollections,
+  deleteCollection,
+} from "@/service/collectionService";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import Swal from "sweetalert2";
+import { exportFullFormToExcel } from "@/actions/excelActions";
+import TahsilatExportButton from "./TahsilatExportButton";
+import TahsilatFilters from "./TahsilatFilters";
+import TahsilatTable from "./TahsilatTable";
 
-export default function TahsilatListesi({ onEdit }) {
+export default function TahsilatListesiPage({ onEdit, refreshList, setRefreshList }) {
   const [collections, setCollections] = useState([]);
   const [firms, setFirms] = useState([]);
+  const [firmSearch, setFirmSearch] = useState("");
+  const [selectedCollections, setSelectedCollections] = useState([]);
+
   const [query, setQuery] = useState({
     firmId: "",
     startDate: "",
@@ -17,113 +31,89 @@ export default function TahsilatListesi({ onEdit }) {
 
   useEffect(() => {
     getAllFirms()
-      .then(setFirms)
+      .then((res) => {
+        if (Array.isArray(res.data)) setFirms(res.data);
+        else if (Array.isArray(res)) setFirms(res);
+        else throw new Error("Firma verisi geçersiz");
+      })
       .catch((err) => {
         console.error("Firma listesi alınamadı", err);
+        setFirms([]);
       });
   }, []);
 
   useEffect(() => {
     fetchTahsilatlar();
-  }, [query]);
+  }, [query, refreshList]);
 
   const fetchTahsilatlar = async () => {
     try {
-      const result = await searchCollections(query);
-      setCollections(result.content || []);
+      const queryToSend = { ...query };
+      if (!query.startDate) delete queryToSend.startDate;
+      if (!query.endDate) delete queryToSend.endDate;
+
+      const result = await searchCollections(queryToSend);
+      setCollections(result?.content || []);
     } catch (err) {
       console.error("Tahsilatlar alınamadı:", err);
     }
   };
 
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setQuery((prev) => ({ ...prev, [name]: value }));
+  const handleSelect = (id, isSelected) => {
+    if (isSelected) {
+      setSelectedCollections((prev) => [...prev, id]);
+    } else {
+      setSelectedCollections((prev) => prev.filter((item) => item !== id));
+    }
+  };
+
+  const handleDelete = (id) => {
+    Swal.fire({
+      title: "Emin misin?",
+      text: "Bu tahsilatı kalıcı olarak silmek istiyor musun?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Evet, Sil",
+      cancelButtonText: "Vazgeç",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await deleteCollection(id);
+          Swal.fire("Başarılı", "Tahsilat başarıyla silindi", "success");
+          setRefreshList((prev) => !prev);
+        } catch (error) {
+          Swal.fire("Hata", error.message, "error");
+        }
+      }
+    });
   };
 
   return (
     <div className="p-6">
       <h2 className="text-xl font-bold mb-4">Tahsilat Listesi</h2>
 
-      {/* Filtre Alanı */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-        <select
-          name="firmId"
-          onChange={handleFilterChange}
-          className="p-2 border"
-        >
-          <option value="">Tüm Firmalar</option>
-          {firms.map((firm) => (
-            <option key={firm.id} value={firm.id}>
-              {firm.name}
-            </option>
-          ))}
-        </select>
+      <TahsilatExportButton 
+        collections={collections}
+        selected={selectedCollections}
+      />
 
-        <input
-          name="startDate"
-          type="date"
-          onChange={handleFilterChange}
-          className="p-2 border"
-        />
+      <TahsilatFilters
+        query={query}
+        setQuery={setQuery}
+        firms={firms}
+        firmSearch={firmSearch}
+        setFirmSearch={setFirmSearch}
+      />
 
-        <input
-          name="endDate"
-          type="date"
-          onChange={handleFilterChange}
-          className="p-2 border"
-        />
-
-        <select
-          name="paymentMethod"
-          onChange={handleFilterChange}
-          className="p-2 border"
-        >
-          <option value="">Tümü</option>
-          <option value="CASH">Nakit</option>
-          <option value="CREDIT_CARD">Kredi Kartı</option>
-          <option value="BANK_TRANSFER">Banka Transferi</option>
-          <option value="CHECK">Çek</option>
-        </select>
-      </div>
-
-      {/* Liste Alanı */}
-      <table className="w-full border text-sm">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="border p-2">Firma</th>
-            <th className="border p-2">Tutar</th>
-            <th className="border p-2">Tarih</th>
-            <th className="border p-2">Ödeme Tipi</th>
-            <th className="border p-2">Makbuz No</th>
-            <th className="border p-2">İşlem</th>
-          </tr>
-        </thead>
-        <tbody>
-          {collections.map((col) => (
-            <tr key={col.id}>
-              <td className="border p-2">{col.firmName}</td>
-              <td className="border p-2">
-                {col.amount.toLocaleString("tr-TR")} ₺
-              </td>
-              <td className="border p-2">{col.collectionDate}</td>
-              <td className="border p-2">{col.paymentMethod}</td>
-              <td className="border p-2">{col.receiptNumber || "-"}</td>
-              <td className="border p-2 flex gap-2">
-                <button onClick={() => console.log("Düzenle", col)}>✏️</button>
-                <button onClick={() => console.log("Sil", col.id)}>🗑️</button>
-              </td>
-            </tr>
-          ))}
-          {collections.length === 0 && (
-            <tr>
-              <td colSpan="5" className="text-center py-4 text-gray-500">
-                Kayıt bulunamadı.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+      <TahsilatTable
+        collections={collections}
+        selected={selectedCollections}
+        onSelect={handleSelect}
+        onEdit={onEdit}
+        onDelete={handleDelete}
+      />
     </div>
   );
 }

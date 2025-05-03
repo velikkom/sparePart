@@ -1,8 +1,17 @@
 const BASE_URL = "http://localhost:8080/api/collection";
 
+// ✅ Ortak token alma fonksiyonu
 const getToken = () => {
-  const user = JSON.parse(localStorage.getItem("user"));
-  return user?.token || "";
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user?.token) return user.token;
+
+    const token = localStorage.getItem("token");
+    return token || "";
+  } catch (e) {
+    console.error("Token okunamadı:", e);
+    return "";
+  }
 };
 
 // ✅ Tahsilat ekle
@@ -47,11 +56,10 @@ export const getCollections = async (queryParams = {}) => {
 // ✅ Tahsilatları ara
 export const searchCollections = async (queryParams = {}) => {
   const query = new URLSearchParams(queryParams).toString();
-  const token = JSON.parse(localStorage.getItem("user"))?.token;
 
-  const res = await fetch(`http://localhost:8080/api/collection/search?${query}`, {
+  const res = await fetch(`${BASE_URL}/search?${query}`, {
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${getToken()}`,
     },
   });
 
@@ -63,11 +71,10 @@ export const searchCollections = async (queryParams = {}) => {
 
 // ✅ Tahsilat sil
 export const deleteCollection = async (id) => {
-  const user = JSON.parse(localStorage.getItem("user"));
-  const res = await fetch(`http://localhost:8080/api/collections/${id}`, {
+  const res = await fetch(`${BASE_URL}/${id}`, {
     method: "DELETE",
     headers: {
-      Authorization: `Bearer ${user?.token}`,
+      Authorization: `Bearer ${getToken()}`,
     },
   });
 
@@ -80,12 +87,11 @@ export const deleteCollection = async (id) => {
 
 // ✅ Tahsilat güncelle
 export const updateCollection = async (id, data) => {
-  const user = JSON.parse(localStorage.getItem("user"));
-  const res = await fetch(`http://localhost:8080/api/collection/${id}`, {
+  const res = await fetch(`${BASE_URL}/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${user?.token}`,
+      Authorization: `Bearer ${getToken()}`,
     },
     body: JSON.stringify(data),
   });
@@ -97,4 +103,3 @@ export const updateCollection = async (id, data) => {
 
   return true;
 };
-

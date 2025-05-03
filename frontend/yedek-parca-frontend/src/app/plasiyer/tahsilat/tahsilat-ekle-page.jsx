@@ -1,103 +1,87 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Swal from "sweetalert2";
-import { getAllFirms, getFirmById } from "@/service/firmservice";
+import { useEffect, useState } from "react";
+import { getAllFirms } from "@/service/firmservice";
 import { addCollection } from "@/service/collectionService";
+import Swal from "sweetalert2";
 
-
-export default function TahsilatEklePage({selected, setSelected}) {
-  const [formData, setFormData] = useState({
+export default function TahsilatEklePage({ triggerRefresh }) {
+  const [firms, setFirms] = useState([]);
+  const [form, setForm] = useState({
     firmId: "",
     amount: "",
     collectionDate: "",
     paymentMethod: "",
     receiptNumber: "",
+    checkBankName: "",
+    checkDueDate: "",
+    noteDueDate: "",
   });
 
-  const [firms, setFirms] = useState([]);
-  const [selectedFirmDebt, setSelectedFirmDebt] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  // ✔️ Firmaları yükle
   useEffect(() => {
     getAllFirms()
-      .then((data) => setFirms(data))
-      .catch(() => Swal.fire("Hata", "Firmalar yüklenemedi", "error"));
-  }, []);
-  console.log("getAllFirms çağrıldı");
-
-  useEffect(() => {
-    if (selected) {
-      setForm({
-        firmId: selected.firmId,
-        amount: selected.amount,
-        collectionDate: selected.collectionDate,
-        paymentMethod: selected.paymentMethod,
-        receiptNumber: selected.receiptNumber || "",
+      .then((res) => {
+        if (Array.isArray(res.data)) {
+          setFirms(res.data);
+        } else {
+          throw new Error("Firma listesi alınamadı.");
+        }
+      })
+      .catch((err) => {
+        console.error("Firma verileri alınamadı:", err);
+        setFirms([]);
       });
-    }
-  }, [selected]);
-  
+  }, []);
 
-  const handleChange = async (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-
-    if (name === "firmId" && value) {
-      try {
-        const firm = await getFirmById(value);
-        setSelectedFirmDebt(firm.debt);
-      } catch (err) {
-        Swal.fire("Hata", "Firma borcu alınamadı", "error");
-      }
-    }
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
 
     try {
-      await addCollection(formData);
-
-      Swal.fire("Başarılı", "Tahsilat kaydedildi", "success");
-
-      // Borçtan düş
-      if (selectedFirmDebt !== null && formData.amount) {
-        const updatedDebt = selectedFirmDebt - parseFloat(formData.amount);
-        setSelectedFirmDebt(Math.max(updatedDebt, 0).toFixed(2));
-      }
-
-      setFormData({
+      await addCollection(form);
+      Swal.fire("Başarılı", "Tahsilat eklendi", "success");
+      setForm({
         firmId: "",
         amount: "",
         collectionDate: "",
         paymentMethod: "",
         receiptNumber: "",
+        checkBankName: "",
+        checkDueDate: "",
+        noteDueDate: "",
       });
+      if (typeof triggerRefresh === "function") {
+        triggerRefresh();
+      }
     } catch (error) {
-      Swal.fire("Hata", error.message || "Tahsilat eklenemedi", "error");
-    } finally {
-      setLoading(false);
+      console.error("Tahsilat eklenemedi:", error);
+      Swal.fire("Hata", "Tahsilat eklenemedi", "error");
     }
   };
 
   return (
-    <div className="max-w-xl mx-auto mt-10 bg-white shadow p-6 rounded">
-      <h1 className="text-2xl font-bold mb-6 text-center">Tahsilat Ekle</h1>
+    <div className="p-6 max-w-xl mx-auto">
+      <h2 className="text-2xl font-bold mb-4">Tahsilat Ekle</h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Firma seçimi */}
         <div>
-          <label>Firma</label>
+          <label className="block mb-1 font-medium">Firma</label>
           <select
             name="firmId"
-            value={formData.firmId}
+            value={form.firmId}
             onChange={handleChange}
             className="w-full border p-2 rounded"
             required
           >
-            <option value="">Firma seçiniz</option>
+            <option value="">Firma Seçin</option>
             {firms.map((firm) => (
               <option key={firm.id} value={firm.id}>
                 {firm.name}
@@ -105,61 +89,101 @@ export default function TahsilatEklePage({selected, setSelected}) {
             ))}
           </select>
         </div>
-
-        {selectedFirmDebt !== null && (
-          <div className="text-sm text-gray-600 mb-2">
-            Seçilen firmanın mevcut borcu: <strong>₺ {selectedFirmDebt}</strong>
-          </div>
-        )}
-
+        {/* Ödeme tipi */}
         <div>
-          <label>Tahsilat Tutarı</label>
-          <input
-            type="number"
-            name="amount"
-            value={formData.amount}
-            onChange={handleChange}
-            className="w-full border p-2 rounded"
-            required
-          />
-        </div>
-
-        <div>
-          <label>Tahsilat Tarihi</label>
-          <input
-            type="date"
-            name="collectionDate"
-            value={formData.collectionDate}
-            onChange={handleChange}
-            className="w-full border p-2 rounded"
-            required
-          />
-        </div>
-
-        <div>
-          <label>Ödeme Türü</label>
+          <label className="block mb-1 font-medium">Ödeme Yöntemi</label>
           <select
             name="paymentMethod"
-            value={formData.paymentMethod}
+            value={form.paymentMethod}
             onChange={handleChange}
             className="w-full border p-2 rounded"
             required
           >
-            <option value="">Ödeme tipi seçiniz</option>
+            <option value="">Seçin</option>
             <option value="CASH">Nakit</option>
-            <option value="CREDIT_CARD">Kredi Kartı</option>
-            <option value="BANK_TRANSFER">Banka Havalesi</option>
             <option value="CHECK">Çek</option>
-            <option value="OTHER">Diğer</option>
+            <option value="CREDIT_CARD">Kredi Kartı</option>
+            <option value="BANK_TRANSFER">Banka Transferi</option>
+            <option value="NOTE">Senet</option>
           </select>
         </div>
 
+        {/* Çek ödeme yöntemi seçildiyse ek alanlar */}
+        {form.paymentMethod === "CHECK" && (
+          <>
+            <div>
+              <label className="block mb-1 font-medium">Çek Banka Adı</label>
+              <input
+                type="text"
+                name="checkBankName"
+                value={form.checkBankName}
+                onChange={handleChange}
+                className="w-full border p-2 rounded"
+              />
+            </div>
+
+            <div>
+              <label className="block mb-1 font-medium">Çek Vade Tarihi</label>
+              <input
+                type="date"
+                name="checkDueDate"
+                value={form.checkDueDate}
+                onChange={handleChange}
+                className="w-full border p-2 rounded"
+              />
+            </div>
+          </>
+        )}
+        {form.paymentMethod === "NOTE" && (
+          <>
+            <div>
+              <label className="block mb-1 font-medium">
+                Senet Vade Tarihi
+              </label>
+              <input
+                type="date"
+                name="noteDueDate"
+                value={form.noteDueDate}
+                onChange={handleChange}
+                className="w-full border p-2 rounded"
+              />
+            </div>
+          </>
+        )}
+
+        {/* Tahsilat tutarı */}
         <div>
-          <label>Makbuz No</label>
+          <label className="block mb-1 font-medium">Tutar</label>
+          <input
+            type="number"
+            name="amount"
+            value={form.amount}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
+            required
+          />
+        </div>
+
+        {/* Tahsilat tarihi */}
+        <div>
+          <label className="block mb-1 font-medium">Tarih</label>
+          <input
+            type="date"
+            name="collectionDate"
+            value={form.collectionDate}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
+            required
+          />
+        </div>
+
+        {/* Makbuz No */}
+        <div>
+          <label className="block mb-1 font-medium">Makbuz No</label>
           <input
             type="text"
             name="receiptNumber"
-            value={formData.receiptNumber}
+            value={form.receiptNumber}
             onChange={handleChange}
             className="w-full border p-2 rounded"
           />
@@ -167,10 +191,9 @@ export default function TahsilatEklePage({selected, setSelected}) {
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-          disabled={loading}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
         >
-          {loading ? "Kaydediliyor..." : "Kaydet"}
+          Kaydet
         </button>
       </form>
     </div>

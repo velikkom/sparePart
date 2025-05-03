@@ -1,29 +1,39 @@
-// src/services/firmservice.js
-
 const API_URL = "http://localhost:8080/api/firms";
+const API_URL1 = "http://localhost:8080/api/admin/users/excel";
 
-// ✅ Token'ı localStorage'dan güvenli bir şekilde al
+// ✅ Token alma fonksiyonu (user objesinden token alır)
 const getToken = () => {
-  const user = JSON.parse(localStorage.getItem("user"));
-  return user?.token || "";
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user?.token) return user.token;
+
+    // fallback: sadece 'token' anahtarı varsa onu da dene
+    const token = localStorage.getItem("token");
+    return token || "";
+  } catch (e) {
+    console.error("Token okunamadı:", e);
+    return "";
+  }
 };
 
-// ✅ Tüm firmaları getir
 export const getAllFirms = async () => {
+  const token = getToken();
+  console.log("🔐 Kullanılacak token:", token);
+
   try {
     const res = await fetch(API_URL, {
       headers: {
-        Authorization: `Bearer ${getToken()}`,
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
     });
 
     if (!res.ok) {
       const errorText = await res.text();
-      throw new Error("Firmalar alınamadı: " + errorText);
+      throw new Error("❌ Firmalar alınamadı: " + errorText);
     }
 
-    const data = await res.json();
-    return data.data;
+    return await res.json();
   } catch (error) {
     console.error("❌ getAllFirms hatası:", error);
     throw error;
@@ -119,4 +129,25 @@ export const deleteFirm = async (id) => {
     console.error("❌ deleteFirm hatası:", error);
     throw error;
   }
+};
+
+// ✅ Excel dosyasını yükleyen metod
+export const uploadFirmsExcel = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch(API_URL1, {
+    method: "POST",
+    body: formData,
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+      // 'Content-Type' belirtme! fetch bunu otomatik ayarlıyor, boundary ile birlikte
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Dosya yükleme başarısız.");
+  }
+
+  return await res.text(); // veya res.json() — backend ne döndürüyorsa
 };

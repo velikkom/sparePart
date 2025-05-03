@@ -3,6 +3,7 @@ package com.velikkom.demo.service.business;
 import com.velikkom.demo.dto.business.CollectionDTO;
 import com.velikkom.demo.entity.concretes.business.Collection;
 import com.velikkom.demo.entity.concretes.business.Firm;
+import com.velikkom.demo.entity.enums.PaymentMethods;
 import com.velikkom.demo.exception.ResourceNotFoundException;
 import com.velikkom.demo.mapper.CollectionMapper;
 import com.velikkom.demo.payload.request.CollectionSearchRequest;
@@ -20,7 +21,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j // ✨ Loglama ekliyoruz
+@Slf4j
 public class CollectionServiceImpl implements CollectionService {
 
     private final CollectionRepository collectionRepository;
@@ -35,16 +36,24 @@ public class CollectionServiceImpl implements CollectionService {
         Collection collection = collectionMapper.toEntity(dto);
         collection.setFirm(firm);
 
-        // Firma borcunu tahsilat kadar azalt
+        // 🧠 NOT: Eğer ödeme yöntemi senetse, amount = noteAmount olacak şekilde ayarlanmalı
+        if (dto.getPaymentMethod() == PaymentMethods.NOTE && dto.getNoteAmount() != null) {
+            collection.setAmount(dto.getNoteAmount());
+        } else {
+            collection.setAmount(dto.getAmount());
+        }
+
+        // Firmadan borç düş
         BigDecimal currentDebt = firm.getDebt() != null ? firm.getDebt() : BigDecimal.ZERO;
-        BigDecimal newDebt = currentDebt.subtract(dto.getAmount());
-        firm.setDebt(newDebt.max(BigDecimal.ZERO));
+        BigDecimal newDebt = currentDebt.subtract(collection.getAmount());
+        firm.setDebt(newDebt.max(BigDecimal.ZERO)); // Negatifse sıfıra sabitle
 
         firmRepository.save(firm);
+        Collection saved = collectionRepository.save(collection);
 
-        Collection savedCollection = collectionRepository.save(collection);
-        return collectionMapper.toDTO(savedCollection);
+        return collectionMapper.toDTO(saved);
     }
+
 
     @Override
     public List<CollectionDTO> getCollectionsByFirmId(Long firmId) {
@@ -54,8 +63,7 @@ public class CollectionServiceImpl implements CollectionService {
 
     @Override
     public Page<CollectionDTO> searchCollections(CollectionSearchRequest request, Pageable pageable) {
-        // ✨ Log ekledik
-        log.debug("Tahsilat araması başlatıldı. Filtreler -> FirmId: {}, StartDate: {}, EndDate: {}, PaymentMethod: {}",
+        log.debug("Tahsilat araması: firmId={}, start={}, end={}, method={}",
                 request.getFirmId(), request.getStartDate(), request.getEndDate(), request.getPaymentMethod());
 
         Page<Collection> resultPage = collectionRepository.searchCollections(
@@ -74,24 +82,33 @@ public class CollectionServiceImpl implements CollectionService {
         Collection collection = collectionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Tahsilat bulunamadı"));
 
-        // Güncelleme alanları
-        collection.setAmount(dto.getAmount());
+        // 🔄 Miktar: senetse noteAmount'dan alınacak
+        if (dto.getPaymentMethod() == PaymentMethods.NOTE && dto.getNoteAmount() != null) {
+            collection.setAmount(dto.getNoteAmount());
+        } else {
+            collection.setAmount(dto.getAmount());
+        }
+
         collection.setCollectionDate(dto.getCollectionDate());
         collection.setPaymentMethod(dto.getPaymentMethod());
         collection.setReceiptNumber(dto.getReceiptNumber());
+
         collection.setCheckBankName(dto.getCheckBankName());
         collection.setCheckDueDate(dto.getCheckDueDate());
+
         collection.setNoteAmount(dto.getNoteAmount());
         collection.setNoteDueDate(dto.getNoteDueDate());
 
-        // Firma kontrolü
+        // Firma değiştiyse güncelle
         if (!collection.getFirm().getId().equals(dto.getFirmId())) {
-            collection.setFirm(firmRepository.findById(dto.getFirmId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Firma bulunamadı")));
+            Firm firm = firmRepository.findById(dto.getFirmId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Firma bulunamadı"));
+            collection.setFirm(firm);
         }
 
         collectionRepository.save(collection);
     }
+
 
     @Override
     public void deleteCollection(Long id) {
@@ -100,5 +117,4 @@ public class CollectionServiceImpl implements CollectionService {
 
         collectionRepository.delete(collection);
     }
-
 }

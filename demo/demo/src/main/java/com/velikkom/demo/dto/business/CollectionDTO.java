@@ -21,4 +21,5 @@ public class CollectionDTO {
     private BigDecimal noteAmount;
     private LocalDate noteDueDate;
 
+
 }
