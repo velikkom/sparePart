@@ -6,8 +6,14 @@ import TahsilatFilters from "./TahsilatFilters";
 import TahsilatTable from "../TahsilatTable";
 import useTahsilatListesi from "@/helpers/hooks/useTahsilatListesi";
 import useFirmaListesi from "@/helpers/hooks/useFirmaListesi";
+import { handleDeleteCollection } from "@/actions/collectionActions";
+import TahsilatFiltreClearButton from "./TahsilatFiltreClearButton";
 
-export default function TahsilatListesi({ onEdit, refreshList }) {
+export default function TahsilatListesi({
+  onEdit,
+  refreshList,
+  setRefreshList,
+}) {
   const { firmaListesi: firms = [] } = useFirmaListesi();
   const [selected, setSelected] = useState([]);
 
@@ -41,23 +47,33 @@ export default function TahsilatListesi({ onEdit, refreshList }) {
     );
   };
 
+  const handleDelete = (id) => {
+    handleDeleteCollection(id, () => setRefreshList((prev) => !prev));
+  };
+  const handleEdit = (collection) => {
+    setSelectedCollection(collection); // 👈 bu state form tarafına aktarılacak
+  };
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Tahsilat Listesi</h2>
-        <TahsilatExportButton data={tahsilatlar} />
+        {/* <TahsilatFiltreClearButton setFilters={setFilterState}/> */}
+        <TahsilatExportButton data={tahsilatlar} />        
       </div>
 
       <TahsilatFilters
         filters={filterState}
         setFilters={setFilterState}
         firms={firms}
+        
       />
+    
 
       <TahsilatTable
         collections={tahsilatlar}
         loading={loading}
         onEdit={onEdit}
+        onDelete={handleDelete}
         selected={selected}
         onSelect={handleSelect}
       />

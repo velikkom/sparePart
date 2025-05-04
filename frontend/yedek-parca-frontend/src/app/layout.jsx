@@ -1,8 +1,8 @@
 "use client";
+import "bootstrap-icons/font/bootstrap-icons.css";
 import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
-
 import { SessionProvider } from "next-auth/react";
 import AuthStatus from "../app/components/authstatus";
 import "../styles/globals.css";
@@ -22,8 +22,8 @@ export default function RootLayout({ children }) {
     <html lang="tr">
       <body>
         <SessionProvider>
-       <Header />
-        <div>{children}</div>
+          <Header />
+          <div>{children}</div>
         </SessionProvider>
       </body>
     </html>

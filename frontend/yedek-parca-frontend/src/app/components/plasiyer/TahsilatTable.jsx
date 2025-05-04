@@ -1,5 +1,5 @@
-"use client";
-
+import { Button } from "primereact/button";
+import { BiTrash } from "react-icons/bi";
 export default function TahsilatTable({
   collections = [],
   selected = [],
@@ -8,7 +8,6 @@ export default function TahsilatTable({
   onDelete = () => {},
   loading = false,
 }) {
-  console.log("Gelen collections verisi:", collections);
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full border border-gray-300">
@@ -44,12 +43,10 @@ export default function TahsilatTable({
                   <input
                     type="checkbox"
                     checked={col.id && selected.includes(String(col.id))}
-                    onChange={(e) =>
-                      onSelect(String(col.id), e.target.checked)
-                    }
+                    onChange={(e) => onSelect(String(col.id), e.target.checked)}
                   />
                 </td>
-                <td className="border p-2">{col.firm?.name || "-"}</td>
+                <td className="border p-2">{col.firmName || "-"}</td>
                 <td className="border p-2">{col.amount}</td>
                 <td className="border p-2">
                   {col.collectionDate?.slice(0, 10)}
@@ -57,19 +54,29 @@ export default function TahsilatTable({
                 <td className="border p-2">{col.paymentMethod}</td>
                 <td className="border p-2">{col.receiptNumber || "-"}</td>
                 <td className="border p-2">{col.note || "-"}</td>
-                <td className="border p-2 text-center space-x-2">
-                  <button
-                    onClick={() => onEdit(col)}
-                    className="text-blue-600 hover:underline"
-                  >
-                    ✏️
-                  </button>
-                  <button
-                    onClick={() => onDelete(col.id)}
-                    className="text-red-600 hover:underline"
-                  >
-                    🗑️
-                  </button>
+                <td className="border p-2 text-center flex gap-2 justify-center">
+                  <div className="flex justify-center align-items-between gap-7">
+                    <Button
+                      className="hover:bg-blue-300"
+                      icon="bi bi-pencil"
+                      severity="info"
+                      rounded
+                      text
+                      aria-label="Düzenle"
+                      onClick={() => onEdit(col)}
+                      //tooltip="Düzenle"
+                    />
+                    <Button
+                      className="hover:bg-red-700"
+                      icon="bi bi-trash3"
+                      severity="danger"
+                      rounded
+                      text
+                      aria-label="Sil"
+                      onClick={() => onDelete(col.id)}
+                      //tooltip="Sil"
+                    />
+                  </div>
                 </td>
               </tr>
             ))

@@ -8,6 +8,7 @@ const useTahsilatListesi = (filters, refreshTrigger) => {
   const filterQuery = useMemo(() => {
     const query = {};
     if (filters.firmId) query.firmId = filters.firmId;
+    if (filters.firmName) query.firmName = filters.firmName;
     if (filters.startDate) query.startDate = filters.startDate;
     if (filters.endDate) query.endDate = filters.endDate;
     if (filters.paymentMethod) query.paymentMethod = filters.paymentMethod;

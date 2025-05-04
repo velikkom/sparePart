@@ -4,7 +4,17 @@ import FirmaAutocompleteInput from "../tahsilat-ekle/FirmaAutocompleteInput";
 export default function TahsilatFilters({ filters, setFilters, firms = [] }) {
   const [firmSearch, setFirmSearch] = useState("");
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
-
+  const clearAllFilters = () => {
+    setFilters({
+      firmId: "",
+      startDate: "",
+      endDate: "",
+      paymentMethod: "",
+      minAmount: "",
+      maxAmount: "",
+    });
+  };
+  
   const filteredFirms = useMemo(() => {
     return firms.filter((f) =>
       f.name.toLowerCase().includes(firmSearch.toLowerCase())
@@ -39,7 +49,7 @@ export default function TahsilatFilters({ filters, setFilters, firms = [] }) {
         type="date"
         name="startDate"
         value={filters.startDate || ""}
-        onChange={handleChange}
+        onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
         className="p-2 border w-full"
       />
 
@@ -47,20 +57,22 @@ export default function TahsilatFilters({ filters, setFilters, firms = [] }) {
         type="date"
         name="endDate"
         value={filters.endDate || ""}
-        onChange={handleChange}
+        onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
         className="p-2 border w-full"
       />
 
       <select
         name="paymentMethod"
         value={filters.paymentMethod || ""}
-        onChange={handleChange}
+        onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
         className="p-2 border w-full"
       >
         <option value="">Tümü</option>
         <option value="CASH">Nakit</option>
         <option value="CHECK">Çek</option>
         <option value="NOTE">Senet</option>
+        <option value="BANK_TRANSFER">Banka Transferi</option>
+        <option value="CREDIT_CARD">Kredi Kartı</option>
       </select>
 
       <div className="flex gap-2">
@@ -69,7 +81,7 @@ export default function TahsilatFilters({ filters, setFilters, firms = [] }) {
           name="minAmount"
           placeholder="Min tutar"
           value={filters.minAmount || ""}
-          onChange={handleChange}
+          onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
           className="p-2 border w-full"
         />
         <input
@@ -77,7 +89,7 @@ export default function TahsilatFilters({ filters, setFilters, firms = [] }) {
           name="maxAmount"
           placeholder="Max tutar"
           value={filters.maxAmount || ""}
-          onChange={handleChange}
+          onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
           className="p-2 border w-full"
         />
       </div>

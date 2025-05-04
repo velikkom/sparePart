@@ -1,16 +1,15 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
 import { getAllFirms } from "@/service/firmservice";
-import { addCollection } from "@/service/collectionService";
+import { addCollection, updateCollection } from "@/service/collectionService";
 import Swal from "sweetalert2";
 import FirmaAutocompleteInput from "./FirmaAutocompleteInput";
 import TahsilatFormInputs from "./TahsilatFormInputs";
 import TahsilatExtraFields from "./TahsilatExtraFields";
 import TahsilatFormActions from "./TahsilatFormActions";
 
-export default function TahsilatEklePage({ triggerRefresh }) {
+export default function TahsilatEklePage({ selectedCollection, clearSelection, triggerRefresh }) {
   const [firms, setFirms] = useState([]);
   const [firmSearch, setFirmSearch] = useState("");
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -38,6 +37,32 @@ export default function TahsilatEklePage({ triggerRefresh }) {
   }, []);
 
   useEffect(() => {
+    if (selectedCollection) {
+      setForm({
+        firmId: selectedCollection.firmId || "",
+        amount: selectedCollection.amount || "",
+        collectionDate: selectedCollection.collectionDate || "",
+        paymentMethod: selectedCollection.paymentMethod || "",
+        receiptNumber: selectedCollection.receiptNumber || "",
+        checkBankName: selectedCollection.checkBankName || "",
+        noteDueDate: selectedCollection.noteDueDate || "",
+        checkDueDate: selectedCollection.checkDueDate || "",
+      });
+  
+      // Firma adı filtre alanına yazılsın ve seçim hazır hale gelsin
+      if (selectedCollection.firmName) {
+        setFirmSearch(selectedCollection.firmName);
+        setSelectedFirm({
+          id: selectedCollection.firmId,
+          name: selectedCollection.firmName,
+        });
+      }
+    }
+  }, [selectedCollection]);
+  
+  
+
+  useEffect(() => {
     if (selectedFirm?.id) {
       setForm((prev) => ({ ...prev, firmId: selectedFirm.id }));
     }
@@ -55,14 +80,16 @@ export default function TahsilatEklePage({ triggerRefresh }) {
       return Swal.fire("Hata", "Lütfen ödeme tipini seçin!", "error");
     }
 
-    const payload = {
-      ...form,
-      paymentMethod: form.paymentMethod || null,
-    };
-
     try {
-      await addCollection(payload);
-      Swal.fire("Başarılı", "Tahsilat kaydedildi", "success");
+      if (selectedCollection) {
+        await updateCollection(selectedCollection.id, form);
+        Swal.fire("Güncellendi", "Tahsilat başarıyla güncellendi", "success");
+        clearSelection?.();
+      } else {
+        await addCollection(form);
+        Swal.fire("Eklendi", "Tahsilat başarıyla eklendi", "success");
+      }
+
       triggerRefresh?.();
       setForm({
         firmId: "",
@@ -78,15 +105,15 @@ export default function TahsilatEklePage({ triggerRefresh }) {
       setSelectedFirm(null);
     } catch (err) {
       console.error(err);
-      Swal.fire("Hata", "Tahsilat kaydedilemedi", "error");
+      Swal.fire("Hata", "İşlem başarısız", "error");
     }
   };
 
   return (
     <div className="max-w-2xl mx-auto mt-6 p-4 border rounded shadow bg-white">
-      <h2 className="text-lg font-bold mb-4">Tahsilat Ekle</h2>
+      <h2 className="text-lg font-bold mb-4">Tahsilat {selectedCollection ? "Güncelle" : "Ekle"}</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <FirmaAutocompleteInput 
+        <FirmaAutocompleteInput
           firmSearch={firmSearch}
           setFirmSearch={setFirmSearch}
           highlightedIndex={highlightedIndex}

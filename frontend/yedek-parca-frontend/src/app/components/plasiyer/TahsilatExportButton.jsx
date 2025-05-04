@@ -15,7 +15,7 @@ export default function TahsilatExportButton({ collections, selected }) {
   return (
     <button
       onClick={handleExport}
-      className="bg-blue-600 text-white px-4 py-2 rounded mb-4"
+      className="bg-green-600 text-white px-4 py-2 rounded mb-4"
     >
       Tahsilat Formunu Excel'e Aktar
     </button>
