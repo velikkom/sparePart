@@ -37,7 +37,6 @@ export const addCollection = async (data) => {
 // ✅ Tahsilatları filtrele
 export const getCollections = async (queryParams = {}) => {
   const query = new URLSearchParams(queryParams).toString();
-
   const res = await fetch(`${BASE_URL}/search?${query}`, {
     headers: {
       Authorization: `Bearer ${getToken()}`,

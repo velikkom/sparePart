@@ -21,7 +21,7 @@ export const getAllFirms = async () => {
   console.log("🔐 Kullanılacak token:", token);
 
   try {
-    const res = await fetch(API_URL, {
+    const res = await fetch("http://localhost:8080/api/firms", {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
