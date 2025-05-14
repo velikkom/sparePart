@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -19,12 +20,17 @@ public interface CollectionRepository extends JpaRepository<Collection, Long> {
             "(:firmId IS NULL OR c.firm.id = :firmId) AND " +
             "(:paymentMethod IS NULL OR c.paymentMethod = :paymentMethod) AND " +
             "(COALESCE(:startDate, NULL) IS NULL OR c.collectionDate >= :startDate) AND " +
-            "(COALESCE(:endDate, NULL) IS NULL OR c.collectionDate <= :endDate)")
+            "(COALESCE(:endDate, NULL) IS NULL OR c.collectionDate <= :endDate) AND " +
+            "(:minAmount IS NULL OR c.amount >= :minAmount) AND " +
+            "(:maxAmount IS NULL OR c.amount <= :maxAmount)"
+    )
     Page<Collection> searchCollections(
             @Param("firmId") Long firmId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
             @Param("paymentMethod") PaymentMethods paymentMethod,
+            @Param("minAmount") BigDecimal minAmount,
+            @Param("maxAmount") BigDecimal maxAmount,
             Pageable pageable
     );
 }

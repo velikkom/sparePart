@@ -16,5 +16,8 @@ public class CollectionSearchRequest {
     private LocalDate checkDueDate;
     private LocalDate noteDueDate;
     private BigDecimal noteAmount;
+    private BigDecimal minAmount;
+    private BigDecimal maxAmount;
+
 
 }

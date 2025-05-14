@@ -17,7 +17,14 @@ public class CollectionMapper {
    private final ModelMapper modelMapper;
 
     public CollectionDTO toDTO(Collection collection) {
-        return modelMapper.map(collection, CollectionDTO.class);
+        CollectionDTO dto = modelMapper.map(collection, CollectionDTO.class);
+
+        // Manuel olarak firmName'i ayarla
+        if (collection.getFirm() != null) {
+            dto.setFirmName(collection.getFirm().getName());
+        }
+
+        return dto;
     }
 
     public Collection toEntity(CollectionDTO collectionDTO) {

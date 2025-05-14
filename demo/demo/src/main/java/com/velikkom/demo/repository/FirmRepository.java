@@ -13,4 +13,3 @@ public interface FirmRepository extends JpaRepository<Firm ,Long >, JpaSpecifica
 
     boolean existsByTaxNumber(String taxNumber);
 }
-//todo burda kaldım

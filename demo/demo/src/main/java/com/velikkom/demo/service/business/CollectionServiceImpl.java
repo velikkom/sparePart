@@ -71,6 +71,8 @@ public class CollectionServiceImpl implements CollectionService {
                 request.getStartDate(),
                 request.getEndDate(),
                 request.getPaymentMethod(),
+                request.getMinAmount(),
+                request.getMaxAmount(),
                 pageable
         );
 

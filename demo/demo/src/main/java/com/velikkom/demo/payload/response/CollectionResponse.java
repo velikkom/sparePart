@@ -12,6 +12,7 @@ import java.time.LocalDate;
 public class CollectionResponse {
 
     private Long firmId;
+    private String firmName;
     private LocalDate startDate;
     private LocalDate endDate;
     private PaymentMethods paymentMethod;

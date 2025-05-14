@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @RestController
@@ -45,6 +46,9 @@ public class CollectionController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(required = false) PaymentMethods paymentMethod,
+            @RequestParam(required = false) BigDecimal minAmount,
+            @RequestParam(required = false) BigDecimal maxAmount,
+
             @PageableDefault(size = 10, sort = "collectionDate", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         CollectionSearchRequest request = new CollectionSearchRequest();
@@ -52,6 +56,8 @@ public class CollectionController {
         request.setStartDate(startDate);
         request.setEndDate(endDate);
         request.setPaymentMethod(paymentMethod);
+        request.setMinAmount(minAmount);
+        request.setMaxAmount(maxAmount);
 
         Page<CollectionDTO> result = collectionService.searchCollections(request, pageable);
 
@@ -76,5 +82,8 @@ public class CollectionController {
         return ResponseEntity.ok(new ResponseWrapper<>(true, null));
     }
 
+//
+//    @GetMapping("firms")
+//    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_PLASIYER')")
 
 }
