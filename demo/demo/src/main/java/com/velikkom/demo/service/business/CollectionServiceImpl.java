@@ -4,6 +4,7 @@ import com.velikkom.demo.dto.business.CollectionDTO;
 import com.velikkom.demo.entity.concretes.business.Collection;
 import com.velikkom.demo.entity.concretes.business.Firm;
 import com.velikkom.demo.entity.enums.PaymentMethods;
+import com.velikkom.demo.exception.CustomException;
 import com.velikkom.demo.exception.ResourceNotFoundException;
 import com.velikkom.demo.mapper.CollectionMapper;
 import com.velikkom.demo.payload.request.CollectionSearchRequest;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -32,6 +34,11 @@ public class CollectionServiceImpl implements CollectionService {
     public CollectionDTO createCollection(CollectionDTO dto) {
         Firm firm = firmRepository.findById(dto.getFirmId())
                 .orElseThrow(() -> new ResourceNotFoundException("Firma bulunamadı"));
+
+        //makbuz numarası unique check
+        if (collectionRepository.existsByReceiptNumber(dto.getReceiptNumber())){
+            throw new CustomException("Bu makbuz numarası zaten sistemde mevcut" + dto.getReceiptNumber(), HttpStatus.CONFLICT);
+        }
 
         Collection collection = collectionMapper.toEntity(dto);
         collection.setFirm(firm);

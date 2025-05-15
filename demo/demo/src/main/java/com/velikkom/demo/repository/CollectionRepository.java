@@ -33,4 +33,6 @@ public interface CollectionRepository extends JpaRepository<Collection, Long> {
             @Param("maxAmount") BigDecimal maxAmount,
             Pageable pageable
     );
+
+    boolean existsByReceiptNumber(String receiptNumber);
 }
