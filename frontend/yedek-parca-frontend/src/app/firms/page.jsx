@@ -7,19 +7,33 @@ import FirmList from "../components/firms/FirmList";
 import { Container, Row, Col } from "react-bootstrap";
 
 const FirmaPaneli = () => {
- 
   const [selectedFirm, setSelectedFirm] = useState(null);
   const [firms, setFirms] = useState([]);
 
-  // ✅ Firmaları çekme fonksiyonu
   const fetchFirms = async () => {
     try {
       const data = await getAllFirms();
-      setFirms(data);
+  
+      if (Array.isArray(data)) {
+        // ✅ backend doğrudan list dönüyor
+        setFirms(data);
+      } else if (Array.isArray(data?.content)) {
+        // ✅ Spring pagination yapısı
+        setFirms(data.content);
+      } else if (Array.isArray(data?.data)) {
+        // ✅ {"data": [firm1, firm2]} gibi yapı
+        setFirms(data.data);
+      } else {
+        console.error("Beklenmeyen firma veri yapısı:", data);
+        setFirms([]);
+      }
     } catch (error) {
       console.error("Firmaları çekerken hata oluştu:", error);
+      setFirms([]);
     }
   };
+  
+  
 
   useEffect(() => {
     fetchFirms();
@@ -31,7 +45,6 @@ const FirmaPaneli = () => {
         <h2 className="text-3xl text-center font-bold mb-6">Firma Paneli</h2>
 
         <Row className="g-4">
-          {/* ✅ Firma Formu */}
           <Col xs={12} lg={4}>
             <div className="p-4 bg-white rounded-lg shadow-md">
               <h3 className="text-xl font-semibold text-center mb-4">
@@ -45,7 +58,6 @@ const FirmaPaneli = () => {
             </div>
           </Col>
 
-          {/* ✅ Firma Listesi */}
           <Col xs={12} lg={8}>
             <div className="p-4 bg-white rounded-lg shadow-md">
               <h3 className="text-xl font-semibold text-center mb-4">

@@ -2,29 +2,30 @@
 
 import { useEffect, useState } from "react";
 import { getAllFirms } from "@/service/firmservice";
-import { addCollection, updateCollection } from "@/service/collectionService";
+import {
+  handleSubmit as onFormSubmit,
+  handleChange as onInputChange,
+  fillFormWithSelectedCollection,
+  resetFormState,
+} from "../../../../actions/tahsilatEkleActions";
+
 import Swal from "sweetalert2";
 import FirmaAutocompleteInput from "./FirmaAutocompleteInput";
 import TahsilatFormInputs from "./TahsilatFormInputs";
 import TahsilatExtraFields from "./TahsilatExtraFields";
 import TahsilatFormActions from "./TahsilatFormActions";
 
-export default function TahsilatEklePage({ selectedCollection, clearSelection, triggerRefresh }) {
+export default function TahsilatEklePage({
+  selectedCollection,
+  clearSelection,
+  triggerRefresh,
+}) {
   const [firms, setFirms] = useState([]);
   const [firmSearch, setFirmSearch] = useState("");
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [selectedFirm, setSelectedFirm] = useState(null);
 
-  const [form, setForm] = useState({
-    firmId: "",
-    amount: "",
-    collectionDate: "",
-    paymentMethod: "",
-    receiptNumber: "",
-    checkBankName: "",
-    checkDueDate: "",
-    noteDueDate: "",
-  });
+  const [form, setForm] = useState(resetFormState());
 
   const filteredFirms = firms.filter((firm) =>
     firm.name.toLowerCase().includes(firmSearch.toLowerCase())
@@ -38,29 +39,14 @@ export default function TahsilatEklePage({ selectedCollection, clearSelection, t
 
   useEffect(() => {
     if (selectedCollection) {
-      setForm({
-        firmId: selectedCollection.firmId || "",
-        amount: selectedCollection.amount || "",
-        collectionDate: selectedCollection.collectionDate || "",
-        paymentMethod: selectedCollection.paymentMethod || "",
-        receiptNumber: selectedCollection.receiptNumber || "",
-        checkBankName: selectedCollection.checkBankName || "",
-        noteDueDate: selectedCollection.noteDueDate || "",
-        checkDueDate: selectedCollection.checkDueDate || "",
-      });
-  
-      // Firma adı filtre alanına yazılsın ve seçim hazır hale gelsin
-      if (selectedCollection.firmName) {
-        setFirmSearch(selectedCollection.firmName);
-        setSelectedFirm({
-          id: selectedCollection.firmId,
-          name: selectedCollection.firmName,
-        });
-      }
+      fillFormWithSelectedCollection(
+        selectedCollection,
+        setForm,
+        setFirmSearch,
+        setSelectedFirm
+      );
     }
   }, [selectedCollection]);
-  
-  
 
   useEffect(() => {
     if (selectedFirm?.id) {
@@ -68,51 +54,26 @@ export default function TahsilatEklePage({ selectedCollection, clearSelection, t
     }
   }, [selectedFirm]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!form.paymentMethod) {
-      return Swal.fire("Hata", "Lütfen ödeme tipini seçin!", "error");
-    }
-
-    try {
-      if (selectedCollection) {
-        await updateCollection(selectedCollection.id, form);
-        Swal.fire("Güncellendi", "Tahsilat başarıyla güncellendi", "success");
-        clearSelection?.();
-      } else {
-        await addCollection(form);
-        Swal.fire("Eklendi", "Tahsilat başarıyla eklendi", "success");
-      }
-
-      triggerRefresh?.();
-      setForm({
-        firmId: "",
-        amount: "",
-        collectionDate: "",
-        paymentMethod: "",
-        receiptNumber: "",
-        checkBankName: "",
-        checkDueDate: "",
-        noteDueDate: "",
-      });
-      setFirmSearch("");
-      setSelectedFirm(null);
-    } catch (err) {
-      console.error(err);
-      Swal.fire("Hata", "İşlem başarısız", "error");
-    }
-  };
-
   return (
     <div className="max-w-2xl mx-auto mt-6 p-4 border rounded shadow bg-white">
-      <h2 className="text-lg font-bold mb-4">Tahsilat {selectedCollection ? "Güncelle" : "Ekle"}</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <h2 className="text-lg font-bold mb-4">
+        Tahsilat {selectedCollection ? "Güncelle" : "Ekle"}
+      </h2>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          onFormSubmit({
+            form,
+            selectedCollection,
+            clearSelection,
+            triggerRefresh,
+            setForm,
+            setFirmSearch,
+            setSelectedFirm,
+          });
+        }}
+        className="space-y-4"
+      >
         <FirmaAutocompleteInput
           firmSearch={firmSearch}
           setFirmSearch={setFirmSearch}
@@ -129,7 +90,7 @@ export default function TahsilatEklePage({ selectedCollection, clearSelection, t
             type="date"
             name="collectionDate"
             value={form.collectionDate}
-            onChange={handleChange}
+            onChange={(e) => onInputChange(e, setForm)}
             className="w-full border p-2 rounded"
             required
           />
@@ -144,9 +105,12 @@ export default function TahsilatEklePage({ selectedCollection, clearSelection, t
           setReceiptNumber={(v) => setForm((p) => ({ ...p, receiptNumber: v }))}
         />
 
-        <TahsilatExtraFields form={form} handleChange={handleChange} />
+        <TahsilatExtraFields
+          form={form}
+          handleChange={(e) => onInputChange(e, setForm)}
+        />
 
-        <TahsilatFormActions onSubmit={handleSubmit} />
+        <TahsilatFormActions />
       </form>
     </div>
   );

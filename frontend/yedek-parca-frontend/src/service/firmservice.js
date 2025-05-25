@@ -1,43 +1,33 @@
+import { getToken } from "@/utils/tokenHelpers";
+
 const API_URL = "http://localhost:8080/api/firms";
 const API_URL1 = "http://localhost:8080/api/admin/users/excel";
 
 // ✅ Token alma fonksiyonu (user objesinden token alır)
-const getToken = () => {
-  try {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (user?.token) return user.token;
+// const getToken = () => {
+//   try {
+//     const user = JSON.parse(localStorage.getItem("user"));
+//     if (user?.token) return user.token;
 
-    // fallback: sadece 'token' anahtarı varsa onu da dene
-    const token = localStorage.getItem("token");
-    return token || "";
-  } catch (e) {
-    console.error("Token okunamadı:", e);
-    return "";
-  }
-};
+//     // fallback: sadece 'token' anahtarı varsa onu da dene
+//     const token = localStorage.getItem("token");
+//     return token || "";
+//   } catch (e) {
+//     console.error("Token okunamadı:", e);
+//     return "";
+//   }
+// };
 
 export const getAllFirms = async () => {
-  const token = getToken();
-  console.log("🔐 Kullanılacak token:", token);
+  const res = await fetch(API_URL, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+      "Content-Type": "application/json",
+    },
+  });
 
-  try {
-    const res = await fetch("http://localhost:8080/api/firms", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error("❌ Firmalar alınamadı: " + errorText);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("❌ getAllFirms hatası:", error);
-    throw error;
-  }
+  if (!res.ok) throw new Error("❌ Firmalar alınamadı: " + await res.text());
+  return await res.json();
 };
 
 // ✅ ID ile firma getir

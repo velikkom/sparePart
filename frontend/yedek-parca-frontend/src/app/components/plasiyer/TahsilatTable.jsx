@@ -1,5 +1,5 @@
-import { Button } from "primereact/button";
-import { BiTrash } from "react-icons/bi";
+"use client";
+
 export default function TahsilatTable({
   collections = [],
   selected = [],
@@ -8,6 +8,7 @@ export default function TahsilatTable({
   onDelete = () => {},
   loading = false,
 }) {
+  console.log("Gelen collections verisi:", collections);
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full border border-gray-300">
@@ -19,20 +20,19 @@ export default function TahsilatTable({
             <th className="p-2 border">Tarih</th>
             <th className="p-2 border">Ödeme Tipi</th>
             <th className="p-2 border">Makbuz No</th>
-            <th className="p-2 border">Not</th>
             <th className="p-2 border">İşlem</th>
           </tr>
         </thead>
         <tbody>
           {loading ? (
             <tr>
-              <td colSpan={8} className="p-4 text-center">
+              <td colSpan={7} className="p-4 text-center">
                 Yükleniyor...
               </td>
             </tr>
           ) : collections.length === 0 ? (
             <tr>
-              <td colSpan={8} className="p-4 text-center">
+              <td colSpan={7} className="p-4 text-center">
                 Kayıt bulunamadı.
               </td>
             </tr>
@@ -53,30 +53,19 @@ export default function TahsilatTable({
                 </td>
                 <td className="border p-2">{col.paymentMethod}</td>
                 <td className="border p-2">{col.receiptNumber || "-"}</td>
-                <td className="border p-2">{col.note || "-"}</td>
-                <td className="border p-2 text-center flex gap-2 justify-center">
-                  <div className="flex justify-center align-items-between gap-7">
-                    <Button
-                      className="hover:bg-blue-300"
-                      icon="bi bi-pencil"
-                      severity="info"
-                      rounded
-                      text
-                      aria-label="Düzenle"
-                      onClick={() => onEdit(col)}
-                      //tooltip="Düzenle"
-                    />
-                    <Button
-                      className="hover:bg-red-700"
-                      icon="bi bi-trash3"
-                      severity="danger"
-                      rounded
-                      text
-                      aria-label="Sil"
-                      onClick={() => onDelete(col.id)}
-                      //tooltip="Sil"
-                    />
-                  </div>
+                <td className="border p-2 text-center space-x-2">
+                  <button
+                    onClick={() => onEdit(col)}
+                    className="text-blue-600 hover:underline"
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    onClick={() => onDelete(col.id)}
+                    className="text-red-600 hover:underline"
+                  >
+                    🗑️
+                  </button>
                 </td>
               </tr>
             ))

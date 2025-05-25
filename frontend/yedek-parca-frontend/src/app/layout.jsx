@@ -3,18 +3,15 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
-import { SessionProvider } from "next-auth/react";
-import AuthStatus from "../app/components/authstatus";
+import "react-toastify/dist/ReactToastify.css"; // ✅ Toastify CSS
 import "../styles/globals.css";
 import "@fortawesome/fontawesome-svg-core/styles.css";
+import { SessionProvider } from "next-auth/react";
 import { config } from "@fortawesome/fontawesome-svg-core";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faFacebookF,
-  faGoogle,
-  faLinkedinIn,
-} from "@fortawesome/free-brands-svg-icons";
+import { ToastContainer } from "react-toastify"; // ✅ Toast Container
 import Header from "./components/header/header";
+import AuthStatus from "../app/components/authstatus";
+
 config.autoAddCss = false;
 
 export default function RootLayout({ children }) {
@@ -23,7 +20,19 @@ export default function RootLayout({ children }) {
       <body>
         <SessionProvider>
           <Header />
+          <AuthStatus />
           <div>{children}</div>
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+          />
         </SessionProvider>
       </body>
     </html>

@@ -54,7 +54,7 @@ const getMenuItems = (
         [
           {
             items: [
-              { label: "Tüm Firmalar", path: "/firms" },
+              { label: "Firma Ekle-Güncelle", path: "/firms" },
               { label: "Firma Yükle", path: "/admin/firma-yukle" }, // ✅ Eklendi
             ],
           },

@@ -36,3 +36,18 @@ export const handleDeleteCollection = async (id, refreshList) => {
     });
   }
 };
+
+const handleReceiptNumberBlur = async () => {
+  try {
+    const response = await axios.get(`/api/collections/check-receipt/${formData.receiptNumber}`);
+    if (!response.data.isUnique) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Uyarı',
+        text: 'Bu makbuz numarası zaten kullanılmış.',
+      });
+    }
+  } catch (error) {
+    console.error('Makbuz numarası kontrolü sırasında hata oluştu:', error);
+  }
+};

@@ -91,7 +91,7 @@ export const updateUserRoles = async (id, roles) => {
   }
 };
 
-//✅ Yeni kullanıcı bildirimi var mı?
+
 //✅ Yeni kullanıcı bildirimi var mı?
 export const checkNewUserAlert = async () => {
   const token = getToken();
@@ -134,3 +134,5 @@ export const acknowledgeNewUsers = async () => {
     throw err;
   }
 };
+
+
