@@ -71,6 +71,7 @@ public class CollectionController {
             @PathVariable Long id,
             @RequestBody CollectionDTO collectionDTO
     ) {
+
         collectionService.updateCollection(id, collectionDTO);
         return ResponseEntity.ok(new ResponseWrapper<>(true, "Tahsilat güncellendi"));
     }

@@ -6,7 +6,7 @@ import lombok.*;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
+
 @Builder
 public class ResponseWrapper<T> {
     private boolean success;
@@ -16,5 +16,6 @@ public class ResponseWrapper<T> {
     public ResponseWrapper(boolean b, String firmCreated) {
     }
 
-
+    public ResponseWrapper(boolean b, String firmCreated,T data) {
+    }
 }

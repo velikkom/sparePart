@@ -1,10 +1,14 @@
 package com.velikkom.demo.controller.business;
 
 import com.velikkom.demo.dto.business.FirmDTO;
+import com.velikkom.demo.entity.concretes.business.Firm;
+import com.velikkom.demo.entity.concretes.user.User;
+import com.velikkom.demo.mapper.FirmMapper;
 import com.velikkom.demo.messages.SuccessMessages;
 import com.velikkom.demo.payload.ResponseWrapper;
 import com.velikkom.demo.payload.request.FirmRequest;
 import com.velikkom.demo.service.FirmService;
+import com.velikkom.demo.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +17,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -22,6 +28,8 @@ import java.util.List;
 public class FirmController {
 
     private final FirmService firmService;
+    private final UserService userService;
+    private final FirmMapper firmMapper;
 
     private <T> ResponseEntity<ResponseWrapper<T>> buildResponse(String message, T data) {
         return ResponseEntity.ok(new ResponseWrapper<>(true, message, data));
@@ -62,6 +70,9 @@ public class FirmController {
         firmService.deleteFirm(id);
         return buildResponse(SuccessMessages.FIRM_DELETED, null);
     }
+
+
+
 
 
 }

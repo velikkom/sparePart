@@ -20,9 +20,10 @@ public class UserDetailsImpl implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return user.getRoles()
                 .stream()
-                .map(role -> new SimpleGrantedAuthority( role.getName().name()))
+                .map(role -> new SimpleGrantedAuthority(role.getName().name())) // "ROLE_ADMIN" şeklinde döner
                 .collect(Collectors.toList());
     }
+
 
     @Override
     public String getPassword() {

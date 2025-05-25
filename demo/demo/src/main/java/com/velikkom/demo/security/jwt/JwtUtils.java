@@ -49,6 +49,7 @@ public class JwtUtils {
 
         return Jwts.builder()
                 .setSubject(user.getEmail()) // sub olarak email
+                .claim("id",user.getId())
                 .claim("roles", roles)       // roller claim'e eklendi
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
@@ -103,4 +104,31 @@ public class JwtUtils {
         }
         return null;
     }
+
+    /**
+     * Token içindeki kullanıcı ID bilgisini döndürür.
+     */
+    public Long getUserIdFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.get("id", Long.class);
+    }
+
+    /**
+     * Token içindeki roller listesini döndürür.
+     */
+    public List<String> getRolesFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.get("roles", List.class);
+    }
+
 }

@@ -1,7 +1,11 @@
 package com.velikkom.demo.controller.user;
 
+import com.velikkom.demo.dto.business.FirmDTO;
 import com.velikkom.demo.dto.user.UserAdminDTO;
+import com.velikkom.demo.entity.concretes.business.Firm;
 import com.velikkom.demo.entity.concretes.user.User;
+import com.velikkom.demo.mapper.FirmMapper;
+import com.velikkom.demo.payload.request.AssignFirmsRequest;
 import com.velikkom.demo.payload.request.UpdateRolesRequest;
 import com.velikkom.demo.repository.UserRepository;
 import com.velikkom.demo.service.ExcelImportService;
@@ -15,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Set;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -26,6 +31,8 @@ public class AdminUserController {
     private final UserService userService;
     private final UserRepository userRepository;
     private final ExcelImportService excelImportService;
+    private final FirmMapper firmMapper;
+
 
     @GetMapping()
     public ResponseEntity<List<UserAdminDTO>> getAllUsers() {
@@ -84,6 +91,25 @@ public class AdminUserController {
         excelImportService.importFirmsFromExcel(file);
         return ResponseEntity.ok("Dosya başarıyla yüklendi ve veriler kaydedildi.");
     }
+
+//    @GetMapping("/{id}/firms")
+//    @PreAuthorize("hasRole('ADMIN')")
+//    public ResponseEntity<List<FirmDTO>> getAssignedFirmsForUser(@PathVariable Long id) {
+//        Set<Firm> firms = userService.getAssignedFirms(id);
+//        List<FirmDTO> firmDTOs = firms.stream()
+//                .map(firmMapper::toDTO)
+//                .toList();
+//        return ResponseEntity.ok(firmDTOs);
+//    }
+//
+//    @PutMapping("/{id}/assign-firms")
+//    @PreAuthorize("hasRole('ADMIN')")
+//    public ResponseEntity<Void> assignFirmsToUser(@PathVariable Long id, @RequestBody AssignFirmsRequest request) {
+//        userService.assignFirms(id, request.getFimIds());
+//        return ResponseEntity.ok().build();
+//    }
+
+
 
 
 

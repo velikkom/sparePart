@@ -1,9 +1,12 @@
 package com.velikkom.demo.entity.concretes.user;
 
+import com.velikkom.demo.entity.concretes.business.Firm;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -41,6 +44,12 @@ public class User {
 
     @Column(name = "new_user", nullable = false)
     private boolean isNewUser = true;
+
+    @Column(name = "approved", nullable = false)
+    private boolean isApproved=false;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserFirm> assignedFirms = new ArrayList<>();
 
 
 }

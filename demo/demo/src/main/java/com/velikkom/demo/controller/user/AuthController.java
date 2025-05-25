@@ -1,6 +1,9 @@
 package com.velikkom.demo.controller.user;
 
+import com.velikkom.demo.dto.business.FirmDTO;
 import com.velikkom.demo.dto.user.UserDTO;
+import com.velikkom.demo.entity.concretes.business.Firm;
+import com.velikkom.demo.entity.concretes.user.User;
 import com.velikkom.demo.messages.SuccessMessages;
 import com.velikkom.demo.payload.ResponseWrapper;
 import com.velikkom.demo.payload.request.LoginRequest;
@@ -10,6 +13,7 @@ import com.velikkom.demo.payload.response.JwtResponse;
 import com.velikkom.demo.security.jwt.JwtUtils;
 import com.velikkom.demo.security.service.UserDetailsImpl;
 import com.velikkom.demo.service.AuthService;
+import com.velikkom.demo.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +27,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "http://localhost:3000")
@@ -32,6 +40,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
     private final AuthService authService;
+
 
 
     @Operation(summary = "Kayıtlı kullanıcı nın logın işlemi", description = "Kayıtlı kullanıcının logın ıslemını yapar ve jwt token dondururu.")
@@ -64,6 +73,9 @@ public class AuthController {
         UserDTO user = authService.registerUserWithRoles(request);
         return ResponseEntity.ok(user);
     }
+
+
+
 
 }
 

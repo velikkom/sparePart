@@ -14,4 +14,8 @@ public class SuccessMessages {
     public static final String PRODUCT_CREATED_SUCCESSFULLY = "Ürün BAŞARIYLA oluşturuldu";
     public static final String PRODUCT_LISTED = "Ürünler listelendi";
     public static final String PRODUCTS_CREATED_SUCCESSFULLY = "Ürünler BAŞARIYLA oluşturuldu";
+    public static final String FIRM_ASSIGNED_SUCCESS = "Firma başarıyla atandı.";
+    public static final String USER_NOT_FOUND = "Kullanıcı bulunamadı.";
+    public static final String FIRM_NOT_FOUND = "Firma bulunamadı.";
+    public static final String FIRM_ALREADY_ASSIGNED = "Bu firmaya zaten atanmış.";;
 }
