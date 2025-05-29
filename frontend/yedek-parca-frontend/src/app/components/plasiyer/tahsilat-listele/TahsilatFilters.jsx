@@ -20,6 +20,7 @@ export default function TahsilatFilters({ filters, setFilters, firms = [] }) {
   };
 
   const filteredFirms = useMemo(() => {
+    if (!Array.isArray(firms)) return [];
     return firms.filter((f) =>
       f.name.toLowerCase().includes(firmSearch.toLowerCase())
     );
@@ -34,7 +35,11 @@ export default function TahsilatFilters({ filters, setFilters, firms = [] }) {
         highlightedIndex={highlightedIndex}
         setHighlightedIndex={setHighlightedIndex}
         filteredFirms={filteredFirms}
-        selectedFirm={firms.find((f) => f.id === filters.firmId)}
+        selectedFirm={
+          Array.isArray(firms)
+            ? firms.find((f) => f.id === filters.firmId)
+            : null
+        }
         onFirmSelect={(firm) =>
           setFilters((prev) => ({ ...prev, firmId: firm?.id || "" }))
         }
@@ -87,7 +92,7 @@ export default function TahsilatFilters({ filters, setFilters, firms = [] }) {
           maxDate={new Date()}
           minDate={filters.startDate ? new Date(filters.startDate) : null}
         />
-       
+
         {filters.endDate && (
           <i
             className="pi pi-times-circle absolute right-14 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 cursor-pointer"

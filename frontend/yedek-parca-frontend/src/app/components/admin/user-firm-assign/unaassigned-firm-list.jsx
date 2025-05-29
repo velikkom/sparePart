@@ -19,34 +19,38 @@ const UnassignedFirmList = ({ firms, users, onAssign }) => {
           {firms.map((firm) => (
             <div
               key={firm.firmId}
-              className="border rounded p-4 shadow-sm bg-white flex flex-col gap-2"
+              className="bg-white p-4 border rounded shadow-md flex flex-col justify-between transition-transform hover:scale-[1.02] hover:shadow-lg hover:border-blue-500"
             >
-              <div className="font-medium text-gray-800">{firm.firmName}</div>
+              <div className="font-semibold text-gray-800 text-lg">
+                {firm.firmName}
+              </div>
 
-              <select
-                className="border p-1 rounded"
-                value={selectedUsers[firm.firmId] || ""}
-                onChange={(e) =>
-                  handleSelectChange(firm.firmId, e.target.value)
-                }
-              >
-                <option value="">Plasiyer Seç</option>
-                {users.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.username}
-                  </option>
-                ))}
-              </select>
+              <div className="flex flex-col gap-2 mt-3">
+                <select
+                  className="border p-2 rounded w-full"
+                  value={selectedUsers[firm.firmId] || ""}
+                  onChange={(e) =>
+                    handleSelectChange(firm.firmId, e.target.value)
+                  }
+                >
+                  <option value="">Plasiyer Seç</option>
+                  {users.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.username}
+                    </option>
+                  ))}
+                </select>
 
-              <button
-                onClick={() =>
-                  onAssign(firm.firmId, selectedUsers[firm.firmId])
-                }
-                disabled={!selectedUsers[firm.firmId]}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded disabled:bg-gray-400"
-              >
-                Ata
-              </button>
+                <button
+                  onClick={() =>
+                    onAssign(firm.firmId, selectedUsers[firm.firmId])
+                  }
+                  disabled={!selectedUsers[firm.firmId]}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm disabled:bg-gray-300"
+                >
+                  Ata
+                </button>
+              </div>
             </div>
           ))}
         </div>

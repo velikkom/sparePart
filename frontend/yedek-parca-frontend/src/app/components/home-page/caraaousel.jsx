@@ -34,15 +34,14 @@ const carouselTemplate = (firma) => {
 
 const Caraousel = () => {
   return (
-    <div
-      className="relative py-10"
+    <div    
       style={{
-        backgroundImage: "url('/img/homepage.jpg')",
+        //backgroundImage: "url('/img/homepage.jpg')",
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
     >
-      <div className="bg-white bg-opacity-80 p-4 rounded-lg max-w-6xl mx-auto">
+      <div className="bg-white-100 bg-opacity-80 p-4 rounded-lg w-full mx-auto">
         <Carousel
           value={firmalar}
           numScroll={1}
@@ -50,7 +49,7 @@ const Caraousel = () => {
           responsiveOptions={responsiveOptions}
           itemTemplate={carouselTemplate}
           autoplayInterval={5000}
-          circular
+          circular     
         />
       </div>
     </div>

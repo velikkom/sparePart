@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getAllFirms } from "@/service/firmservice";
 import {
   handleSubmit as onFormSubmit,
   handleChange as onInputChange,
@@ -14,6 +13,7 @@ import FirmaAutocompleteInput from "./FirmaAutocompleteInput";
 import TahsilatFormInputs from "./TahsilatFormInputs";
 import TahsilatExtraFields from "./TahsilatExtraFields";
 import TahsilatFormActions from "./TahsilatFormActions";
+import { getMyFirms } from "@/service/plasiyerFirmService";
 
 export default function TahsilatEklePage({
   selectedCollection,
@@ -27,15 +27,22 @@ export default function TahsilatEklePage({
 
   const [form, setForm] = useState(resetFormState());
 
-  const filteredFirms = firms.filter((firm) =>
-    firm.name.toLowerCase().includes(firmSearch.toLowerCase())
-  );
+  // const filteredFirms = firms.filter((firm) =>
+  //   firm.name.toLowerCase().includes(firmSearch.toLowerCase())
+  // );
+  const filteredFirms = Array.isArray(firms)
+  ? firms.filter((firm) =>
+      firm.name.toLowerCase().includes(firmSearch.toLowerCase())
+    )
+  : [];
+
 
   useEffect(() => {
-    getAllFirms()
-      .then((res) => setFirms(res.data))
+    getMyFirms()
+      .then((data) => setFirms(data ?? []))
       .catch(() => setFirms([]));
   }, []);
+  
 
   useEffect(() => {
     if (selectedCollection) {

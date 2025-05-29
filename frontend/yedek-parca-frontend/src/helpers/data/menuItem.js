@@ -31,13 +31,14 @@ const getMenuItems = (
     },
 
     {
-      label: "Plasiyer",
+      label: "Firmalarım",
       icon: "pi pi-users",
       items: [
         [
           {
             items: [
               { label: "Tahsilat Ekle/Listesi", path: "/plasiyer/tahsilat" },
+              { label: "Firma Listesi", path: "/plasiyer/firmalar" }, // ✅ Eklendi
             ],
           },
         ],

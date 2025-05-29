@@ -8,7 +8,8 @@ export default function TahsilatTable({
   onDelete = () => {},
   loading = false,
 }) {
-  console.log("Gelen collections verisi:", collections);
+  console.log("🟢 [TABLE] Gelen collections verisi:", collections);
+
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full border border-gray-300">
@@ -37,38 +38,42 @@ export default function TahsilatTable({
               </td>
             </tr>
           ) : (
-            collections.map((col) => (
-              <tr key={col.id}>
-                <td className="border p-2 text-center">
-                  <input
-                    type="checkbox"
-                    checked={col.id && selected.includes(String(col.id))}
-                    onChange={(e) => onSelect(String(col.id), e.target.checked)}
-                  />
-                </td>
-                <td className="border p-2">{col.firmName || "-"}</td>
-                <td className="border p-2">{col.amount}</td>
-                <td className="border p-2">
-                  {col.collectionDate?.slice(0, 10)}
-                </td>
-                <td className="border p-2">{col.paymentMethod}</td>
-                <td className="border p-2">{col.receiptNumber || "-"}</td>
-                <td className="border p-2 text-center space-x-2">
-                  <button
-                    onClick={() => onEdit(col)}
-                    className="text-blue-600 hover:underline"
-                  >
-                    ✏️
-                  </button>
-                  <button
-                    onClick={() => onDelete(col.id)}
-                    className="text-red-600 hover:underline"
-                  >
-                    🗑️
-                  </button>
-                </td>
-              </tr>
-            ))
+            collections.map((col, index) => {
+              console.log(`🔍 [TABLE row ${index}]`, col);
+
+              return (
+                <tr key={col.id || `no-id-${index}`}>
+                  <td className="border p-2 text-center">
+                    <input
+                      type="checkbox"
+                      checked={col.id && selected.includes(String(col.id))}
+                      onChange={(e) => onSelect(String(col.id), e.target.checked)}
+                    />
+                  </td>
+                  <td className="border p-2">{col.firmName || "-"}</td>
+                  <td className="border p-2">{col.amount}</td>
+                  <td className="border p-2">
+                    {col.collectionDate?.slice(0, 10) || "-"}
+                  </td>
+                  <td className="border p-2">{col.paymentMethod || "-"}</td>
+                  <td className="border p-2">{col.receiptNumber || "-"}</td>
+                  <td className="border p-2 text-center space-x-2">
+                    <button
+                      onClick={() => onEdit(col)}
+                      className="text-blue-600 hover:underline"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      onClick={() => onDelete(col.id)}
+                      className="text-red-600 hover:underline"
+                    >
+                      🗑️
+                    </button>
+                  </td>
+                </tr>
+              );
+            })
           )}
         </tbody>
       </table>
