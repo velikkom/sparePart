@@ -18,4 +18,7 @@ public interface UserFirmRepository extends JpaRepository<UserFirm, Long> {
     Optional<UserFirm> findByFirmId(Long firmId); // ✅ EKLENECEK
 
     void deleteByFirmId(Long firmId);
+
+    @Query("SELECT uf.firm.id FROM UserFirm uf WHERE uf.user.id = :userId")
+    List<Long> findFirmIdsByUserId(Long userId);
 }

@@ -17,4 +17,6 @@ public interface CollectionService {
     void updateCollection(Long id, CollectionDTO collectionDTO);
 
     void deleteCollection(Long id);
+
+    List<CollectionDTO> getCollectionsByUserFirms(Long id);
 }

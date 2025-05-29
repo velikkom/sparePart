@@ -35,4 +35,9 @@ public interface CollectionRepository extends JpaRepository<Collection, Long> {
     );
 
     boolean existsByReceiptNumber(String receiptNumber);
+
+    @Query("SELECT uf.firm.id FROM UserFirm uf WHERE uf.user.id = :userId")
+    List<Long> findFirmIdsByUserId(@Param("userId") Long userId);
+
+    List<Collection> findByFirmIdIn(List<Long> firmIds);
 }

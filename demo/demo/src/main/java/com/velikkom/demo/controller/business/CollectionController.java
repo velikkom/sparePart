@@ -1,9 +1,11 @@
 package com.velikkom.demo.controller.business;
 
+import com.sun.security.auth.UserPrincipal;
 import com.velikkom.demo.dto.business.CollectionDTO;
 import com.velikkom.demo.entity.enums.PaymentMethods;
 import com.velikkom.demo.payload.ResponseWrapper;
 import com.velikkom.demo.payload.request.CollectionSearchRequest;
+import com.velikkom.demo.security.service.UserDetailsImpl;
 import com.velikkom.demo.service.CollectionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,10 +18,12 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/collection")
@@ -83,8 +87,10 @@ public class CollectionController {
         return ResponseEntity.ok(new ResponseWrapper<>(true, null));
     }
 
-//
-//    @GetMapping("firms")
-//    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_PLASIYER')")
+    @GetMapping("my-collection")
+    @PreAuthorize("hasRole('PLASIYER')")
+    public List<CollectionDTO>getPlasiyerCollection (@AuthenticationPrincipal UserDetailsImpl user){
+        return collectionService.getCollectionsByUserFirms(user.getId());
+    }
 
 }

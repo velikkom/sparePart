@@ -10,6 +10,7 @@ import com.velikkom.demo.mapper.CollectionMapper;
 import com.velikkom.demo.payload.request.CollectionSearchRequest;
 import com.velikkom.demo.repository.CollectionRepository;
 import com.velikkom.demo.repository.FirmRepository;
+import com.velikkom.demo.repository.UserFirmRepository;
 import com.velikkom.demo.service.CollectionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -29,6 +31,7 @@ public class CollectionServiceImpl implements CollectionService {
     private final CollectionRepository collectionRepository;
     private final FirmRepository firmRepository;
     private final CollectionMapper collectionMapper;
+    private final UserFirmRepository userFirmRepository;
 
     @Override
     public CollectionDTO createCollection(CollectionDTO dto) {
@@ -36,7 +39,7 @@ public class CollectionServiceImpl implements CollectionService {
                 .orElseThrow(() -> new ResourceNotFoundException("Firma bulunamadı"));
 
         //makbuz numarası unique check
-        if (collectionRepository.existsByReceiptNumber(dto.getReceiptNumber())){
+        if (collectionRepository.existsByReceiptNumber(dto.getReceiptNumber())) {
             throw new CustomException("Bu makbuz numarası zaten sistemde mevcut" + dto.getReceiptNumber(), HttpStatus.CONFLICT);
         }
 
@@ -125,5 +128,16 @@ public class CollectionServiceImpl implements CollectionService {
                 .orElseThrow(() -> new ResourceNotFoundException("Tahsilat bulunamadı"));
 
         collectionRepository.delete(collection);
+    }
+
+    @Override
+    public List<CollectionDTO> getCollectionsByUserFirms(Long userId) {
+        System.out.println("🟡 getCollectionsByUserFirms çağrıldı - userId: " + userId);
+
+        List<Long> firmIds = userFirmRepository.findFirmIdsByUserId(userId);
+        System.out.println("🟡 Kullanıcıya atanmış firmalar: " + firmIds);
+
+        List<Collection> collections = collectionRepository.findByFirmIdIn(firmIds);
+        return collections.stream().map(collectionMapper::toDTO).toList();
     }
 }
