@@ -1,20 +1,37 @@
-// src/middleware.js
+import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 
-export function middleware(request) {
-  const response = NextResponse.next();
+export async function middleware(req) {
+  const token = await getToken({
+    req,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
 
-  // Geliştirme ortamındaysa cookie'yi temizle
-  if (process.env.NODE_ENV === "development") {
-    response.cookies.set("next-auth.session-token", "", {
-      maxAge: 0,
-    });
+  const { pathname } = req.nextUrl;
+
+  // Eğer kullanıcı giriş yapmamışsa ve / isteği gelmişse login sayfasına yönlendir
+  if (!token && pathname === "/") {
+    return NextResponse.redirect(new URL("/auth/login", req.url));
   }
 
-  return response;
+  // Kullanıcının rolünü al
+  const roles = token?.roles || [];
+
+  // Eğer kök dizine gelindiyse, role göre yönlendir
+  if (pathname === "/") {
+    if (roles.includes("ROLE_ADMIN")) {
+      return NextResponse.redirect(new URL("/admin/tahsilat", req.url));
+    }
+
+    if (roles.includes("ROLE_PLASIYER")) {
+      return NextResponse.redirect(new URL("/plasiyer/tahsilat", req.url));
+    }
+  }
+
+  return NextResponse.next(); // diğer tüm istekler normal devam etsin
 }
 
-// Hangi yolları etkileyeceğini tanımla
+// Hangi path'lerde middleware çalışacak?
 export const config = {
-  matcher: ["/"], // sadece anasayfa isteğinde çalışır (gerekirse genişletiriz)
+  matcher: ["/"], // sadece anasayfa için çalışır (gerekirse genişletebilirsin)
 };

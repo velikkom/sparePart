@@ -1,4 +1,6 @@
 "use client";
+import"primeicons/primeicons.css";
+import React from "react";
 
 export default function TahsilatTable({
   collections = [],
@@ -8,7 +10,7 @@ export default function TahsilatTable({
   onDelete = () => {},
   loading = false,
 }) {
-  console.log("🟢 [TABLE] Gelen collections verisi:", collections);
+  
 
   return (
     <div className="overflow-x-auto">
@@ -39,7 +41,7 @@ export default function TahsilatTable({
             </tr>
           ) : (
             collections.map((col, index) => {
-              console.log(`🔍 [TABLE row ${index}]`, col);
+              //console.log(`🔍 [TABLE row ${index}]`, col);
 
               return (
                 <tr key={col.id || `no-id-${index}`}>
@@ -47,7 +49,9 @@ export default function TahsilatTable({
                     <input
                       type="checkbox"
                       checked={col.id && selected.includes(String(col.id))}
-                      onChange={(e) => onSelect(String(col.id), e.target.checked)}
+                      onChange={(e) =>
+                        onSelect(String(col.id), e.target.checked)
+                      }
                     />
                   </td>
                   <td className="border p-2">{col.firmName || "-"}</td>
@@ -60,15 +64,15 @@ export default function TahsilatTable({
                   <td className="border p-2 text-center space-x-2">
                     <button
                       onClick={() => onEdit(col)}
-                      className="text-blue-600 hover:underline"
+                      className="text-blue-600 hover:text-blue-800"
                     >
-                      ✏️
+                      <i className="pi pi-pencil"></i>
                     </button>
                     <button
                       onClick={() => onDelete(col.id)}
-                      className="text-red-600 hover:underline"
+                      className="text-red-600 hover:text-red-800"
                     >
-                      🗑️
+                      <i className="pi pi-trash"></i>
                     </button>
                   </td>
                 </tr>

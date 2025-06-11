@@ -18,17 +18,22 @@ const API_URL1 = "http://localhost:8080/api/admin/users/excel";
 //   }
 // };
 
+
 export const getAllFirms = async () => {
-  const res = await fetch(API_URL, {
+  const res = await fetch("http://localhost:8080/api/firms", {
     headers: {
       Authorization: `Bearer ${getToken()}`,
       "Content-Type": "application/json",
     },
   });
 
-  if (!res.ok) throw new Error("❌ Firmalar alınamadı: " + await res.text());
-  return await res.json();
+  if (!res.ok) throw new Error("Firmalar alınamadı");
+  return await res.json(); // ✅ doğrudan liste geliyor
 };
+
+
+
+
 
 // ✅ ID ile firma getir
 export const getFirmById = async (id) => {

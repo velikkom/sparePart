@@ -4,6 +4,7 @@ import { getToken } from "@/utils/tokenHelpers";
 
 const BASE_URL = "http://localhost:8080/api/collection";
 
+// Tahsilat ekleme
 export const addCollection = async (data) => {
   const res = await fetch(`${BASE_URL}/add`, {
     method: "POST",
@@ -18,6 +19,31 @@ export const addCollection = async (data) => {
   return (await res.json()).data;
 };
 
+// 🔹 Admin için tüm tahsilatları çek
+export const getAllCollections = async () => {
+  const res = await fetch(`${BASE_URL}/all`, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+  });
+
+  if (!res.ok) throw new Error("Admin tahsilatları alınamadı");
+  return await res.json();
+};
+
+// 🔹 Plasiyer için kendi tahsilatlarını çek
+export const getMyCollections = async () => {
+  const res = await fetch(`${BASE_URL}/my-collection`, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+  });
+
+  if (!res.ok) throw new Error("Plasiyer tahsilatları alınamadı");
+  return await res.json();
+};
+
+// 🔍 Filtreli arama (admin ve plasiyer için ortak kullanılabilir)
 export const getCollections = async (queryParams = {}) => {
   const formatDate = (date) => {
     if (!date) return "";
@@ -40,7 +66,7 @@ export const getCollections = async (queryParams = {}) => {
 
   const query = new URLSearchParams(cleanQuery).toString();
 
-  const res = await fetch(`http://localhost:8080/api/collection/search?${query}`, {
+  const res = await fetch(`${BASE_URL}/search?${query}`, {
     headers: {
       Authorization: `Bearer ${getToken()}`,
       "Content-Type": "application/json",

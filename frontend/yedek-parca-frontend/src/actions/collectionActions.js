@@ -2,6 +2,7 @@ import Swal from "sweetalert2";
 import { deleteCollection } from "@/service/collectionService";
 
 export const handleDeleteCollection = async (id, refreshList) => {
+  console.log("🗑️ Silinecek tahsilat ID:", id);
   const result = await Swal.fire({
     title: "Silmek istediğinize emin misiniz?",
     text: "Bu işlem geri alınamaz!",
