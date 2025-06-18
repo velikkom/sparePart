@@ -19,4 +19,6 @@ public interface CollectionService {
     void deleteCollection(Long id);
 
     List<CollectionDTO> getCollectionsByUserFirms(Long id);
+
+    List<CollectionDTO> getAllCollections();
 }

@@ -8,10 +8,14 @@ import com.velikkom.demo.messages.ErrorMessages;
 import com.velikkom.demo.payload.request.FirmRequest;
 import com.velikkom.demo.repository.FirmRepository;
 import com.velikkom.demo.service.FirmService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,10 +35,13 @@ public class FirmServiceImpl implements FirmService {
 
     @Override
     public List<FirmDTO> getAllFirms() {
-        return firmRepository.findAll().stream()
+        List<Firm> firms = firmRepository.findAll();
+        return firms.stream()
                 .map(firmMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
+
 
     @Override
     public FirmDTO getFirmById(Long id) {

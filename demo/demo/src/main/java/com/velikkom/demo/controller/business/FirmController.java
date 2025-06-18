@@ -45,8 +45,9 @@ public class FirmController {
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_PLASIYER')")
     @Operation(summary = "Tüm firmaları getir", description = "Sistemde kayıtlı olan tüm firmaları getirir.")
-    public ResponseEntity<ResponseWrapper<List<FirmDTO>>> getAllFirms() {
-        return buildResponse(SuccessMessages.FIRM_LISTED, firmService.getAllFirms());
+    public ResponseEntity<List<FirmDTO>> getAllFirms() {
+        List<FirmDTO> firms = firmService.getAllFirms();
+        return ResponseEntity.ok(firms);
     }
 
     @GetMapping("/{id}")

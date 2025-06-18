@@ -89,8 +89,15 @@ public class CollectionController {
 
     @GetMapping("my-collection")
     @PreAuthorize("hasRole('PLASIYER')")
-    public List<CollectionDTO>getPlasiyerCollection (@AuthenticationPrincipal UserDetailsImpl user){
+    public List<CollectionDTO> getPlasiyerCollection(@AuthenticationPrincipal UserDetailsImpl user) {
         return collectionService.getCollectionsByUserFirms(user.getId());
     }
 
+    @Operation(summary = "Tüm tahsilatları getir (ADMIN)")
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<CollectionDTO>> getAllCollections() {
+        List<CollectionDTO> collections = collectionService.getAllCollections();
+        return ResponseEntity.ok(collections);
+    }
 }

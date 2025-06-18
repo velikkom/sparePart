@@ -7,64 +7,97 @@ const getMenuItems = (
 ) => {
   const items = [
     { label: "Anasayfa", icon: "pi pi-home", path: "/" },
+  ];
 
-    {
-      label: "Ürün",
-      icon: "pi pi-box",
-      items: [
-        [
-          { items: [{ label: "Ürün Listesi", path: "/products" }] },
-          {
-            items:
-              userRole === "ADMIN"
-                ? [{ label: "Yeni Ürün Ekle", path: "/products/add" }]
-                : [],
-          },
-        ],
+  // 📦 Ürün işlemleri (herkes erişebilir)
+  items.push({
+    label: "Ürün",
+    icon: "pi pi-box",
+    items: [
+      [
+        { items: [{ label: "Ürün Listesi", path: "/products" }] },
+        {
+          items:
+            userRole === "ADMIN"
+              ? [{ label: "Yeni Ürün Ekle", path: "/products/add" }]
+              : [],
+        },
       ],
-    },
+    ],
+  });
 
-    {
-      label: "Stok Takibi",
-      icon: "pi pi-clock",
-      items: [[{ items: [{ label: "Stok Görüntüle", path: "/stock" }] }]],
-    },
+  // 🧾 Stok Takibi
+  items.push({
+    label: "Stok Takibi",
+    icon: "pi pi-clock",
+    items: [[{ items: [{ label: "Stok Görüntüle", path: "/stock" }] }]],
+  });
 
-    {
-      label: "Firmalarım",
+  // 👤 PLASIYER MENÜLERİ
+  if (isLoggedIn && userRole === "PLASIYER") {
+    items.push({
+      label: "Plasiyer İşlemleri",
       icon: "pi pi-users",
       items: [
         [
           {
             items: [
               { label: "Tahsilat Ekle/Listesi", path: "/plasiyer/tahsilat" },
-              { label: "Firma Listesi", path: "/plasiyer/firmalar" }, // ✅ Eklendi
-            ],
-          },
-        ],
-      ],
-    },
-  ];
-
-  // 🔐 Sadece ADMIN için Firma ve Admin Paneli menüsü
-  if (isLoggedIn && userRole === "ADMIN") {
-    items.push({
-      label: "Firma",
-      icon: "pi pi-briefcase",
-      items: [
-        [
-          {
-            items: [
-              { label: "Firma Ekle-Güncelle", path: "/firms" },
-              { label: "Firma Yükle", path: "/admin/firma-yukle" }, // ✅ Eklendi
+              { label: "Firma Listesi", path: "/plasiyer/firmalar" },
+              { label: "Harcama Takibi", path: "/plasiyer/harcamalar" }, // ✅
             ],
           },
         ],
       ],
     });
+  }
+
+  // 🛠️ ADMIN MENÜLERİ
+  if (isLoggedIn && userRole === "ADMIN") {
+    items.push(
+      {
+        label: "Tahsilatlar",
+        icon: "pi pi-wallet",
+        items: [
+          [
+            {
+              items: [
+                { label: "Tahsilat Listesi", path: "/admin/tahsilatlar" },
+              ],
+            },
+          ],
+        ],
+      },
+      {
+        label: "Harcamalar",
+        icon: "pi pi-money-bill",
+        items: [
+          [
+            {
+              items: [
+                { label: "Harcama Listesi", path: "/admin/harcamalar" },
+              ],
+            },
+          ],
+        ],
+      },
+      {
+        label: "Firma",
+        icon: "pi pi-briefcase",
+        items: [
+          [
+            {
+              items: [
+                { label: "Firma Ekle-Güncelle", path: "/firms" },
+                { label: "Firma Yükle", path: "/admin/firma-yukle" },
+              ],
+            },
+          ],
+        ],
+      }
+    );
 
     const adminPanelLabel = hasNewUsers ? "Admin Paneli 🔔" : "Admin Paneli";
-
     items.push({
       label: adminPanelLabel,
       icon: "pi pi-cog",
@@ -73,10 +106,10 @@ const getMenuItems = (
     });
   }
 
-  // 👤 Giriş yapıldıysa kullanıcı bilgisi ve çıkış
+  // 👤 Kullanıcı oturum menüsü
   if (isLoggedIn && email) {
     items.push({
-      label: ` ${email}`,
+      label: `${email}`,
       icon: "pi pi-user",
       items: [
         [
@@ -93,6 +126,7 @@ const getMenuItems = (
       ],
     });
   } else {
+    // Giriş yapılmamışsa
     items.push({
       label: "Giriş Yap",
       icon: "pi pi-sign-in",

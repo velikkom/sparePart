@@ -48,6 +48,12 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/user-firms/assign").hasRole("ADMIN")
                         .requestMatchers("/api/user-firms/**").authenticated()
                         .requestMatchers("/api/firms/**").hasAnyRole("ADMIN", "PLASIYER")
+                        .requestMatchers(
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/v3/api-docs.yaml"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))

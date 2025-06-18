@@ -20,8 +20,8 @@ export default function RootLayout({ children }) {
       <body>
         <SessionProvider>
           <Header />
-          <AuthStatus />
-          <div>{children}</div>
+          {/* <AuthStatus /> */}
+          <main className="min-h-screen">{children}</main>
           <ToastContainer
             position="top-right"
             autoClose={3000}

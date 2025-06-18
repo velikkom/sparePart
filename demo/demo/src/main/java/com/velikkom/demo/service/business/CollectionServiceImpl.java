@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -139,5 +140,13 @@ public class CollectionServiceImpl implements CollectionService {
 
         List<Collection> collections = collectionRepository.findByFirmIdIn(firmIds);
         return collections.stream().map(collectionMapper::toDTO).toList();
+    }
+
+    @Override
+    public List<CollectionDTO> getAllCollections() {
+        List<Collection> entities = collectionRepository.findAll();
+        return entities.stream()
+                .map(collectionMapper::toDTO)
+                .collect(Collectors.toList());
     }
 }
