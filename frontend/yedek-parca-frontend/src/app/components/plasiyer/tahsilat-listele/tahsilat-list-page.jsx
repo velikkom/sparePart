@@ -11,6 +11,7 @@ import { handleDeleteCollection } from "@/actions/collectionActions";
 
 import TahsilatExportButton from "../TahsilatExportButton";
 import TahsilatTable from "../TahsilatTable";
+import TahsilatFilters from "./TahsilatFilters";
 
 export default function TahsilatListesi({ onEdit }) {
   const [refreshKey, setRefreshKey] = useState(0);
@@ -70,7 +71,12 @@ export default function TahsilatListesi({ onEdit }) {
         <h2 className="text-xl font-semibold">Tahsilat Listesi</h2>
         <TahsilatExportButton data={tahsilatlar} />
       </div>
-
+    {/* <TahsilatFilters/>
+      <TahsilatFilters
+        filters={{}}
+        setFilters={() => {}}
+        firms={firms}
+      /> */}
       <TahsilatTable
         collections={tahsilatlar}
         loading={loading}

@@ -1,10 +1,9 @@
 "use client";
-
 import { InputText } from "primereact/inputtext";
 import { InputNumber } from "primereact/inputnumber";
 import { Button } from "primereact/button";
 import { Message } from "primereact/message";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { initialProductState } from "@/helpers/initialState";
 import ProductService from "@/service/ProductService";
 import useAuthGuard from "@/helpers/hooks/useAuthGuard";

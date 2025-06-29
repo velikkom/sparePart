@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import UnassignedFirmList from "@/app/components/admin/user-firm-assign/unassigned-firm-list";
+//import UnassignedFirmList from "@/app/components/admin/user-firm-assign/unassigned-firm-list";
+import UnassignedFirmList from "@/app/components/admin/user-firm-assign/unaassigned-firm-list";
 import AssignedFirmGroup from "@/app/components/admin/user-firm-assign/assigned-firm-group";
+//import UnassignedFirmList from '@/app/components/admin/user-firm-assign/UnassignedFirmList';
+
 
 import {
   fetchAllFirmAssignmentsAndUsers,
@@ -10,6 +13,7 @@ import {
   adminReassignFirm,
   adminUnassignFirm,
 } from "@/actions/userFirmActions";
+
 
 export default function FirmaAtamaAdminPage() {
   const [firmAssignments, setFirmAssignments] = useState([]);
