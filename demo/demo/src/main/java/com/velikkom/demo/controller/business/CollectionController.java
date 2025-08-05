@@ -45,7 +45,7 @@ public class CollectionController {
     @Operation(summary = "Tahsilatları filtrele ve sayfalı listele")
     @GetMapping("/search")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_PLASIYER')")
-    public ResponseEntity<ResponseWrapper<Page<CollectionDTO>>> searchCollections(
+    public ResponseEntity<Page<CollectionDTO>> searchCollections(
             @RequestParam(required = false) Long firmId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
@@ -65,8 +65,33 @@ public class CollectionController {
 
         Page<CollectionDTO> result = collectionService.searchCollections(request, pageable);
 
-        return new ResponseEntity<>(new ResponseWrapper<>(true, "Tahsilatlar listelendi", result), HttpStatus.OK);
+        return ResponseEntity.ok(result); // ✅ Artık ResponseWrapper yok
     }
+
+
+    @Operation(summary = "Filtrelenmiş tahsilatların toplam tutarını döner")
+    @GetMapping("/search/total")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_PLASIYER')")
+    public ResponseEntity<ResponseWrapper<BigDecimal>> getFilteredTotal(
+            @RequestParam(required = false) Long firmId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) PaymentMethods paymentMethod,
+            @RequestParam(required = false) BigDecimal minAmount,
+            @RequestParam(required = false) BigDecimal maxAmount
+    ) {
+        CollectionSearchRequest request = new CollectionSearchRequest();
+        request.setFirmId(firmId);
+        request.setStartDate(startDate);
+        request.setEndDate(endDate);
+        request.setPaymentMethod(paymentMethod);
+        request.setMinAmount(minAmount);
+        request.setMaxAmount(maxAmount);
+
+        BigDecimal total = collectionService.getTotalAmount(request);
+        return ResponseEntity.ok(new ResponseWrapper<>(true, "Toplam tahsilat", total));
+    }
+
 
     @Operation(summary = "Tahsilat güncelle", description = "Belirtilen ID'li tahsilatı günceller.")
     @PutMapping("/{id}")

@@ -16,12 +16,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -72,23 +74,6 @@ public class CollectionServiceImpl implements CollectionService {
         return collectionMapper.toDTOList(collections);
     }
 
-    @Override
-    public Page<CollectionDTO> searchCollections(CollectionSearchRequest request, Pageable pageable) {
-        log.debug("Tahsilat araması: firmId={}, start={}, end={}, method={}",
-                request.getFirmId(), request.getStartDate(), request.getEndDate(), request.getPaymentMethod());
-
-        Page<Collection> resultPage = collectionRepository.searchCollections(
-                request.getFirmId(),
-                request.getStartDate(),
-                request.getEndDate(),
-                request.getPaymentMethod(),
-                request.getMinAmount(),
-                request.getMaxAmount(),
-                pageable
-        );
-
-        return resultPage.map(collectionMapper::toDTO);
-    }
 
     @Override
     public void updateCollection(Long id, CollectionDTO dto) {
@@ -149,4 +134,58 @@ public class CollectionServiceImpl implements CollectionService {
                 .map(collectionMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
+
+    @Override
+    public Page<CollectionDTO> searchCollections(CollectionSearchRequest request, Pageable pageable) {
+        Specification<Collection> spec = buildSpecification(request);
+        Page<Collection> pageResult = collectionRepository.findAll(spec, pageable);
+        if (pageResult == null) {
+            return Page.empty(pageable);
+        }
+        return pageResult.map(collectionMapper::toDTO);
+    }
+
+
+    @Override
+    public BigDecimal getTotalAmount(CollectionSearchRequest request) {
+        BigDecimal result = collectionRepository.getTotalAmountByFilters(
+                request.getFirmId(),
+                request.getStartDate(),
+                request.getEndDate(),
+                request.getPaymentMethod(),
+                request.getMinAmount(),
+                request.getMaxAmount()
+        );
+        return Optional.ofNullable(result).orElse(BigDecimal.ZERO);
+    }
+
+    private Specification<Collection> buildSpecification(CollectionSearchRequest request) {
+        return (root, query, cb) -> {
+            var predicates = cb.conjunction();
+
+            if (request.getFirmId() != null) {
+                predicates = cb.and(predicates, cb.equal(root.get("firm").get("id"), request.getFirmId()));
+            }
+
+            if (request.getStartDate() != null && request.getEndDate() != null) {
+                predicates = cb.and(predicates, cb.between(root.get("collectionDate"), request.getStartDate(), request.getEndDate()));
+            }
+
+            if (request.getPaymentMethod() != null) {
+                predicates = cb.and(predicates, cb.equal(root.get("paymentMethod"), request.getPaymentMethod()));
+            }
+
+            if (request.getMinAmount() != null) {
+                predicates = cb.and(predicates, cb.greaterThanOrEqualTo(root.get("amount"), request.getMinAmount()));
+            }
+
+            if (request.getMaxAmount() != null) {
+                predicates = cb.and(predicates, cb.lessThanOrEqualTo(root.get("amount"), request.getMaxAmount()));
+            }
+
+            return predicates;
+        };
+    }
+
 }
