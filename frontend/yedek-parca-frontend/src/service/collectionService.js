@@ -1,16 +1,27 @@
-import { getToken } from "@/utils/tokenHelpers";
-
-
+import { getSession } from "next-auth/react";
 
 const BASE_URL = "http://localhost:8080/api/collection";
 
-// Tahsilat ekleme
+// 🔑 Token'ı NextAuth session'dan alma fonksiyonu
+const getToken = async () => {
+  try {
+    const session = await getSession();
+    return session?.accessToken || "";
+  } catch (error) {
+    console.error("Token alınamadı:", error);
+    return "";
+  }
+};
+
+// 🔹 Tahsilat ekleme
 export const addCollection = async (data) => {
+  const token = await getToken();
+
   const res = await fetch(`${BASE_URL}/add`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${getToken()}`,
+      Authorization: token ? `Bearer ${token}` : "",
     },
     body: JSON.stringify(data),
   });
@@ -19,11 +30,13 @@ export const addCollection = async (data) => {
   return (await res.json()).data;
 };
 
-// 🔹 Admin için tüm tahsilatları çek
+// 🔹 Admin için tüm tahsilatları çek (Eski kullanım - full liste)
 export const getAllCollections = async () => {
+  const token = await getToken();
+
   const res = await fetch(`${BASE_URL}/all`, {
     headers: {
-      Authorization: `Bearer ${getToken()}`,
+      Authorization: token ? `Bearer ${token}` : "",
     },
   });
 
@@ -33,9 +46,11 @@ export const getAllCollections = async () => {
 
 // 🔹 Plasiyer için kendi tahsilatlarını çek
 export const getMyCollections = async () => {
+  const token = await getToken();
+
   const res = await fetch(`${BASE_URL}/my-collection`, {
     headers: {
-      Authorization: `Bearer ${getToken()}`,
+      Authorization: token ? `Bearer ${token}` : "",
     },
   });
 
@@ -43,7 +58,8 @@ export const getMyCollections = async () => {
   return await res.json();
 };
 
-// 🔍 Filtreli arama (admin ve plasiyer için ortak kullanılabilir)
+// 🔍 Filtreli arama + Pagination
+// 🔍 Filtreli arama + Pagination (Admin ve Plasiyer ortak)
 export const getCollections = async (queryParams = {}) => {
   const formatDate = (date) => {
     if (!date) return "";
@@ -66,9 +82,12 @@ export const getCollections = async (queryParams = {}) => {
 
   const query = new URLSearchParams(cleanQuery).toString();
 
+  // ✅ Token'ı al
+  const token = await getToken();
+
   const res = await fetch(`${BASE_URL}/search?${query}`, {
     headers: {
-      Authorization: `Bearer ${getToken()}`,
+      Authorization: token ? `Bearer ${token}` : "",
       "Content-Type": "application/json",
     },
   });
@@ -78,27 +97,43 @@ export const getCollections = async (queryParams = {}) => {
     throw new Error("Tahsilatlar alınamadı: " + errText);
   }
 
-  return (await res.json()).data;
+  const response = await res.json();
+
+  // ✅ Artık ResponseWrapper yok, doğrudan Page objesi geliyor
+  return {
+    content: response.content || [],
+    totalPages: response.totalPages || 0,
+    totalElements: response.totalElements || 0,
+    size: response.size || 10,
+    number: response.number || 0,
+  };
 };
+
 
 export const searchCollections = getCollections;
 
+// 🔹 Tahsilat silme
 export const deleteCollection = async (id) => {
+  const token = await getToken();
+
   const res = await fetch(`${BASE_URL}/${id}`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${getToken()}` },
+    headers: { Authorization: token ? `Bearer ${token}` : "" },
   });
 
   if (!res.ok) throw new Error("Silme işlemi başarısız");
   return true;
 };
 
+// 🔹 Tahsilat güncelleme
 export const updateCollection = async (id, data) => {
+  const token = await getToken();
+
   const res = await fetch(`${BASE_URL}/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${getToken()}`,
+      Authorization: token ? `Bearer ${token}` : "",
     },
     body: JSON.stringify(data),
   });
@@ -107,11 +142,17 @@ export const updateCollection = async (id, data) => {
   return true;
 };
 
+// 🔹 Plasiyer tahsilatlarını farklı endpointten çekme (varsa kullanım)
 export const fetchTahsilatlar = async (query) => {
+  const token = await getToken();
   const queryParams = new URLSearchParams(query).toString();
-  const res = await fetch(`http://localhost:8080/api/plasiyer/collections?${queryParams}`, {
-    headers: { Authorization: `Bearer ${getToken()}` },
-  });
+
+  const res = await fetch(
+    `http://localhost:8080/api/plasiyer/collections?${queryParams}`, 
+    {
+      headers: { Authorization: token ? `Bearer ${token}` : "" },
+    }
+  );
 
   if (!res.ok) throw new Error("Tahsilatlar alınamadı");
   return res.json();
