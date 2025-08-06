@@ -48,9 +48,11 @@ export default function TahsilatListesi({ onEdit, refreshList }) {
       setTotalElements(result.totalElements);
 
       // Toplam tahsilatı hesapla
-      const toplam = result.content.reduce((acc, item) => acc + (item.amount || 0), 0);
+      const toplam = result.content.reduce(
+        (acc, item) => acc + (item.amount || 0),
+        0
+      );
       setTotalAmount(toplam);
-
     } catch (error) {
       console.error("Tahsilatlar alınırken hata:", error);
       Swal.fire("Hata", error.message, "error");
@@ -140,15 +142,16 @@ export default function TahsilatListesi({ onEdit, refreshList }) {
           className="border p-2 rounded"
         />
       </div>
+      <div className="flex justify-between items-center m-4">
+        <button
+          onClick={() => loadData()}
+          className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
+        >
+          Filtrele
+        </button>
 
-      <button
-        onClick={() => loadData()}
-        className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
-      >
-        Filtrele
-      </button>
-
-      <TahsilatExportButton collections={tahsilatlar} selected={selected} />
+        <TahsilatExportButton collections={tahsilatlar} selected={selected} />
+      </div>
 
       <TahsilatTable
         collections={tahsilatlar}
@@ -161,7 +164,9 @@ export default function TahsilatListesi({ onEdit, refreshList }) {
 
       {/* Toplam Tahsilat ve Pagination */}
       <div className="flex justify-between items-center mt-4">
-        <span>Toplam Kayıt: {totalElements} | Filtrelenmiş Tutar: {totalAmount} ₺</span>
+        <span>
+          Toplam Kayıt: {totalElements} | Filtrelenmiş Tutar: {totalAmount} ₺
+        </span>
         <div className="flex space-x-2">
           <button
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
